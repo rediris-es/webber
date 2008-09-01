@@ -1,0 +1,12 @@
+#title= Webber 
+#subtitle= Webber Documentation Main Page
+#wbbIn=
+
+ Hello, this is the main page of webber's documentation, unfortunatelly most of the information is currently written only in
+Spanish, but we are trying hard to have also a English Version.
+<p>
+The doc/ directory is also an example of  webber feautures and usage , the installation script ,should generate a group of
+nice HTML webpages in the ../htmldoc/ directory in the installation path, you can copy or install these/those web pages
+in a web server, with LANG selection if possible to view all the web pages.
+
+

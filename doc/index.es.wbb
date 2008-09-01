@@ -1,0 +1,135 @@
+#title= Webber 
+#subtitle=  Pagina de documentacion de webber
+##wbbPre +  BodyFaq::bodyfaq
+##wbbPre +  BodyFaq::bodyfaq
+#bodyfaq.place = wbbIn
+#wbbIn=
+
+ Esta es la pagina de documentacion de webber, todavia no esta completa y no hemos empezado a traducirla, pero parece
+sensato que haya algo de documentacion  sobre webber y que este mas o menos actualizado.
+<p>
+ Esta documentacion esta generada con webber,  como ejemplo de funcionamiento de este.
+
+TIT: Que es webber ?
+
+ Webber es un programa desarrollado en RedIRIS para el mantenimiento de las paginas HTML de gran parte de los servicios,
+el objetivo fundamental de webber es el de separar la parte de escritura de informacion (contenidos) de lo que puede ser
+la apariencia visual de la pagina, de forma que gran parte de los elementos "de estilo" sean generdos de forma automatica.
+<p>
+ Para eso las paginas se escriben en HTML empleando cualquier editor , pero sin elementos de estilo, (titulo, encabezados,
+menus, pies de pagina, etc) del que se encarga despues webber. El unico problema la forma en la que se definen la informacion
+en webber es un poco "rara" por lo que hay que escribir al principio de la pagina unas lineas para qeu webber lo interprete.
+<p>
+
+TIT: Como funciona webber?
+
+TIT: Una primera página en webber
+
+TIT: Minimas variables webber a usar.
+
+Webber y sus procesadores intentan tener valores "por defecto" ya usables (por ejemplo expresión regular de los fichero
+"fuente" de webber, nombre de  los fichres, plantilla, etc. un fichero de configuración + plantilla mínmo 
+debe terner las siguientes variables, en <strong>Negrita</strong> las que tienen un valor por defecto y seguramente no
+hace falta tocar:
+<p>
+
+<dl>
+<dt>wbbRoot</dt> <dd> Directorio "raiz" de webber, se puede tener "comentada" y emplear la variable
+de entorno WBBROOT para definirlo , sino por defecto emplea el directorio actual</dd>
+<dt><strong>wbbProcLib</strong></dt><dd>Donde se encuentran los procesadores webber, por deecto se define como $var(wbbRoot/proc), es decir el
+contenido de la variable "wbbRoot", definido anteriormente , subdirectorio/proc</dd>
+<dt><strong>wbbVersion</strong></dt><dd> Version de webber</dd>
+<dt><strong>wbbTemplateName</strong></dt><dd>Valor por defecto para los ficheros de "plantilla" o variables globales, por defecto el valor es wbbdir.cfg</dd>
+<dt><strong>wbbFileNameRegExp</strong></dt><dd>Expresión regular para identificar los ficheros webber, tras ejecutarla, en $1 debe estar el nombre del fichero (sin extension),
+por defecto es "^(.+)\.wbb$"</dd>
+<dt><strong>wbbExtension</strong></dt><dd>Eztenson de las paginas HTML, por defecto ".html"</dd>
+<dt>wbbDebugFile</dt><dd>Fichreo donde se almacenara el debug </dd>
+<dt><strong>wbbDebug</strong></dt><dd>Nivel de Debug</dd>
+<dt>wbbSourceRoot</dt><dd>Origen delas paginas HTML</dd>
+<dt>wbbTargetRoot</dt><dd>Destino de las paginas HTML</dd>
+
+</dl>
+
+Además hay que definir en el fichero de configuración o en el wbbdir.cfg raiz los procesadores que se van usar, unos valores 
+comodos sería poner:
+
+<pre>
+ ## Comentarios son con dos "##" almuadillas
+ ## FileLang::filelang Cambia el fichero "destino en función del idioma de la página , permite generar páginas con
+ ##    en formato nombre.html.CC en base a ficheros fuentes nombre.CC.html, CC= codigo ISO del pais, ej es= españa
+ ## Macros::macro  Diversas macros de uso común
+ ## BodyFaq::bodyfaq Genera tablas de contenido al principio de la página en base a etiquetas TIT: de encabezdo
+ #wbbPre= FileLang::filelang Macros::macro BodyFaq::bodyfaq
+ ## Webbo::webbo: Rellena plantillas HTML, en base a variables webber, se define una página con los estilos y formato
+ ## dejando indicado con <var name = "nombre_var" /> los variables "nombre_var" que Webbo debe sustitutir, webbo se emplea
+ ## para homogeneizar el aspecto final de la página.
+ #wbbProc= Webbo::webbo 
+ ## webbo require saber donde se encuentra la plantilla y en que variable "webber" se va a quedar el resultado, para
+ ## esto se emplean dos variables, la más importante es webbo.src que debe apuntar a donde se encuentra la página HTML de 
+ ## plantilla
+ #webbo.src= file:$var(wbbRoot)/samples/doc/doc-template.html
+ #webbo.dst= wbbOut
+</pre>
+
+TIT: Uso de webber: Los procesadores.
+
+ webber tiene incorporados una serie de programas que se encargan de realizar diversas funciones , por ejemplo el procesador
+"Webbo" , se emplea para rellenar plantillas, de forma que podemos tener una pagina HTML "de plantilla" y rellenarla en base
+a variables webber despues .
+
+ Esto se puede emplear cuando tenemos mucho contenido "webber" creado para cambiar el aspecto de las paginas , sin tener que 
+modificar el contenido de estas.
+
+
+TIT: Procesadores weeber incluidos en la distribucion
+
+<dl>
+
+<dt>BodyFaq.pmo</dt>
+	<dd>Crea una pagina con una tabla de contenidos (FAQ), por ejemplo esta pagina</dd>
+<dt>Caparse.pm</dt>
+	<dd>Variable extraction based on an HTML/XML parser</dd>
+<dt>Capaweb.pm</dt>
+	<dd>Extracts Webbers vars from tagged data</dd>
+<dt>CopyFiles.pm</dt>
+	<dd>Copia los ficheros referenciados en la pagina HTML a su destino</dd>
+<dt>Dir.pm</dt>
+	<dd>Dir v0.2:  This is a automatic directory include for webber</dd>
+<dt>DumpVars.pm</dt>
+	<dd>DumpVars v1.0: Store in wbbOut selected Webber vars</dd>
+<dt><a href="proc/encoder.html">Encoder</a></dt>
+	<dd>Cambia la codificacion (UTF-8, latin1, etc) de variables, </dd>
+<dt>Exec.pm</dt>
+	<dd>Exec v1.0: Execute programs and store the output in Webber vars</dd>
+<dt><a href="proc/filelang.html">FileLang.pm</dt>
+	<dd>FileLang: Deteccion de idiomas, permite internacionacionalizacion de paginas</dd>
+
+<dt><a href="proc/macros.pm">Macros.pm</dt>
+	<dd>Conjunto de Macros para realizar algunas tareas de forma automatica </dd>
+<dt>Maketoc.pm</dt>
+	<dd>Maketoc v1.0: TOC generation</dd>
+<dt>PgpSign.pm</dt>
+	<dd>PgpSign 0.2:         Web processor for PGP signing web pages</dd>
+<dt>PrintIn.pm</dt>
+	<dd>PrintIn v1.0: Copy #wbbIn into #wbbOut</dd>
+<dt>Slide.pm<dt>
+	<dd>Slide v1.0: Build slide-show pagesTable.pm=>Table v1.1: Include a table with #dbName into #wbbOut</dd>
+<dt>Webbo.pm</dt>
+	<dd>Webbo: v2.1: Incorporate variables into page templates<dd>
+</dl>
+
+
+
+
+
+TIT: Creacion de nuevos procesadores
+
+Una de las ventajas de Webber es que permite la creacion de nuevos procesadores que realicen determinadas funciones , extendiendo de esta
+forma las funcionalidades de webber . Un ejemplo de esta "extension" de funcionalidaes es el procesador de Macros, que empezo como una
+evolucion de Dir.pm e incorpora determinadas "macros" que se pueden emplear a la hora de facilitar el trabajo con los documentos.
+
+en <ahref="programing/"> la seccion de programacion de procesadores</a> hay mas informacion sobre como escribir nuevos procesadores.
+
+
+
+

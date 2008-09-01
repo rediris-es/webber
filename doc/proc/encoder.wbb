@@ -1,0 +1,24 @@
+#title=Encoder
+#wbbIn=
+
+ Este procesdor permite modificar variables webber , de forma que la codificacion de las cadenas sea
+la apropiada para el servidor WWW.
+<p> 
+ Si se desarrollan las paginas WWW en distintas plataformas/servidores puede pasar que la codificacion
+de algunos caracteres especiales cambie y a la hora de editar y/o modificar paginas no sea el apropiado.
+Este procesador viene a solucionar el problema.
+<p>
+Se puede optimizar, cambiando la variable encoder.targetencoding de forma que solamente se modifique 
+wbbOut (la pagina de salida) y no nos procuremos del resto.
+<p>
+Su uso es muy sencillo:
+<p>
+<ol>
+<li> Incluir Encoder::translate en la lista de procesadores</li>
+<li> Si es necesario cambiar las variables #encoder.targetencoding y #encoder.varstoencode a los
+valores apropiados</li>
+</ol>
+<p>
+Se aconseja tener este procesador en la  configuracion inicial o en un fichero de configuracion de 
+directorio wbbdir.cfg , para no tener que estar anadiendolo en cada pagina .
+

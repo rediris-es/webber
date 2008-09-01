@@ -1,0 +1,22 @@
+
+
+ Este es el primer leeme.
+
+ Esta version de webber, es todavía muy inestable,  aunque en principio debe funcionar casi todo, no tiene todavía un 
+"instalador" , aunque tampoco le hace mucha falta,  para su funcionamiento hace falta solamente el programa/perl script
+webber y los procesadores (el /proc)
+ 
+ En principio en el doc/ debe haber código webber para permitir que todo funciona y que haciendo ./webber -f doc/ se
+cree en el directorio htmldocs/ la documentacion (muy icompleta todavía), de forma que se puedan ir probando las
+nuevas "features" y cambios directamente sobre la documentación de webber .
+
+el fichero webber.cfg muestra una configuración muy mínima,  de las siguientes variables, que se encuentran en el fichero
+wddbidr.cfg permiten generar el contenido de las páginas html que aparecen en htmldoc.
+
+ Así que para trabajar con esta versión de webber.
+
+1. Extraerla del repositorio tal como se comenta en https://forja.rediris.es/scm/?group_id=372
+
+2. hacer ./webber -f -r doc/ para generar los contenidos HTML de documentacion
+
+

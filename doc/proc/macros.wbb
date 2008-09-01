@@ -1,0 +1,109 @@
+#title= Macros
+#wbbPre=Macros::macro
+#wbbIn=
+
+ El procesador de Macros incorpora una serie de "Macros" que se pueden emplear para realizar tareas repetitivas a la hora de hacer
+una pagina www y sobre todo para incluir "ficheros" dentro de la pagina www de una forma facil.
+<p>
+
+Asi por ejemplo si queremos incluir una fichero (en este caso una "pagina" HTML, pero que aparezca como codigo solo tenemos
+que hacer  
+#(quitar)includefile(hola.html,,)
+<p>
+<pre>
+#includefile(hola.html,,) 
+</pre>
+<p>
+para incluirla, la macro por defecto codifica los caracteres HTML para que se muestren realmente, la macro tiene tres parametros,
+el primero es el nombre del fichero y los otros dos indican si se quiere eliminar (buscar/sustituir) alguna cadena.
+
+<p>
+ Con includecode el resultadio sería:
+<br>
+#includecode(hola.html,,) 
+<p>
+
+ Como se ve es muy distinto el resultado.
+
+<p>
+Vamos a emplear el fichero "listado.csv" para otro ejemplo de las macros, el contenido de este fichero se 
+es el siguiente: #(q)includeunscape(listado.csv,,), que por ahora no esta implementado ;-)
+
+Este fichero lo podiamos tambien haber incluido como una lista con el comando #(quitar)listfromfile(listado.csv,,)
+<p>
+#listfromfile(listado.csv,,)
+<p>
+
+Ahora bien, lo que queda bonito es una tabla, lo podemos poner con #(quitar)tablefromcsv(listado.csv.,,), quedando:
+<p>
+#tablefromcsv(listado.csv,,,)
+<p>
+Ahora bien, si nos fijamos este comando lleva una coma mas , porque son cuatro argumentos, ?por qiue ?, imaginemos que 
+de la tabla anterior solo queremos listar las columnas, 1,2 y 4 y por otro lado queremos que el 4 valor (direccion de correo)
+no este en formato "@", sino cambiar la "@" por algun otro caracter , podriamos hacer:
+#(quitar)tablefromcsv(listado.csv,1:2:4,@,(poner la arroba)) 
+<p>
+#tablefromcsv(listado.csv,1:2:4,@,(poner la arroba)) 
+<p>
+Para obtener el efecto deseado.
+
+<p>
+Hay otras dos "macros" interesantes, una de ellas es var(valor), que permite incrustar en el texto el valor de una variable,
+esto puede servir por ejemplo para definir en un procesaro "raiz" "wbbdir.cfg" un valor (por ejemplo un anuncio) y este 
+se puede incluir en el texto.
+<p>
+La otra macro es "setvar", que permite fijar el valor de una variable no en tiempo de lectura de estas , sino cuando se  ejecutan 
+los procesadores, su uso esta pensado por ejemplo en si queremos usar una misma "macro" dos veces dentro de una misma página y queremos
+que tengan distinto valor.
+<p>
+Un ejemplo sería el definir una variable "var"test, lo que vamos a hacer :
+<ul>
+<li> setvar (test,mensaje de prueba)</li>  #setvar(test,mensaje de prueba)
+<li> El valor de test es var(test) = #var(test)</(li>
+<li>Ahora cambiado el valor de test a setvat(test,otro mensaje) ;</li> #setvar(test,otro mensaje) 
+<li>Y ahora de nuevo test vale var(test) = #var(test)</li>
+<ul>
+
+ <p>
+<p>
+
+La ultima macro "dirindex", permite realizar "indices" en base a informacion en formato webber que se encuentre en un directorio,
+por ejemplo , supongamos que tenemos una serie de directorios (en este caso los vamos a llamar "cert", "correo", "eduroam", "noc", en los cuales en
+los ficheros de configuracion de directorio (wbbdir.cfg) tenemos una serie de variables definidas, en este caso para cada ix, tenemos
+definimos las variables author, description, year,  que son variables tipicas que podemos tener a la hora de mantener una
+determinada informacion, mediante "dirindex" tenemos la posiblidad de extraer la información y situaarla en la página WWW.
+<p> La Macro recibe dos argumentos y depende de las siguientes variables:
+<p>
+<ul>
+<li>primer argumento (tipo de listado, ul, ol, dt)</li>
+<li>Variables "webber" a imprimir</p>
+<li>indexdir.file = Nombre del fichero que se va a leer, por defecto es wbbdir.cfg que es el fichro de configuracion por directorios</li>
+<li>indexdir.dir = directorio que se va a listar, por defecto "." </li>
+<li>indexdir.sep = Separador de las entradas, por defecto "<br>"</li>
+</ul>
+
+
+ Pruebas de la Macro indexdir 
+
+
+  Una lista simple , por autores se podria hacer asi:<br>
+
+ <strong>indexdir(ul,author)</strong>
+<p>
+dando como resultado
+<p>
+#indexdir(ul,author) 
+<p>
+
+ Algo mas complicado seria una lista ordenada por title y con la  descripcion:
+<p>
+<strong>\indexdir(ol,title:description)</strong>
+#indexdir(ol,title:description)
+<p>
+Y lo ultimo seria una description por years<p>
+<strong>indexdir(dl,year:title:description)</strong>
+<p>
+#indexdir(dl,year:title:description)
+
+<br>
+
