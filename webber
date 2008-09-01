@@ -65,6 +65,12 @@ my $copyright="Copyright 1996-2008, RedIRIS";
 
 
 getopts ("C:dfhmirHIt:v", \%opt );
+
+# Sets some webber vars  
+$var{'wbbRecursive'}   = ($opt{r} ) ? 1 : 0 ;
+$var{'wbbForceupdate'} = ($opt{f}) ?  1 : 0 ;
+$var{'wbbMakedir'}     = ($opt{m}  ?  0 : 1 ; 
+
 if (defined $opt{h}) { &showHelp; }
 
 $var{'wbbDebug'} = $opt{d} if ( defined $opt{d})  ;
@@ -339,7 +345,7 @@ sub process {
    ((-f "$page") ||  (defined $var{'wbbInteractive'} && ( $var{'wbbInteractive'}  eq "1") )) || die "No such page $page.\n";
    my (@stats) = stat _;
 
-   &readVars ($page, "source file", \%var) unless $opt{i};
+   &readVars ($page, "source file", \%var) unless (defined $var{'wbbInteractive'} && ( $var{'wbbInteractive'}  eq "1")) ;
 
    my $target ;
    if ($var{'wbbTargetRoot'} =~ /absolutePath:\s*(.*)/) {
@@ -363,7 +369,7 @@ sub process {
 	}
    
   
-   if  (! defined ($opt{m} ) and  (not -d $target))
+   if  (($var{'wbbMakedir'} == 1  ) and  (not -d $target))
    {
      mkpath ( untaint("$target") ,0,0755) ;
    }
@@ -373,7 +379,7 @@ sub process {
 
    $target .= "/$name$var{wbbExtension}";
    
-   if (not $opt{f} and (my $targetdate = (stat "$target")[9] )) {
+   if (not $var{'wbbForceupdate'} and (my $targetdate = (stat "$target")[9] )) {
       if ($stats[9]<=$targetdate) {
          print STDERR "$target is more recent than $page. Skipping\n";
          return;
@@ -383,7 +389,7 @@ sub process {
    if  (( defined $var{'wbbInteractive'}) && ( $var{'wbbInteractive'}  eq "1") ) {
 #      chmod 0644, untaint ("$target");
 #      unlink (untaint ("$target"));
-	debug(5, "opt{i} defined y valor = $opt{i}\n"); }
+	 }
 
 	else {
        
@@ -527,7 +533,7 @@ sub ProcessDir {
       }
    }
    foreach my $page (@pages) {  process($page); }
-   if ($opt{r}) {
+   if ($var{'wbbRecursive') {
       foreach my $dir (@dirs) { 
          chdir("./$dir"); 
          &ProcessDir(\%var); 
