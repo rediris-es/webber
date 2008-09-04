@@ -13,7 +13,12 @@ use DB_File ;
  use HTML::Entities;
 
 my %defs = (
-	'macros.place' => 'wbbIn' 
+	'macros.place' 			=> 'wbbIn' ,
+	'macros.indexdir.listingvar'	=> 'all:all' ,
+	'macros.indexdir.usestyle'	=> '' ,
+	'macros.indexdir.file'		=> 'wbbdir.cfg' ,
+	'macros.indexdir.dir'		=> '.' ,
+	'macros.indexdir.sep'		=> '<br>' ,
 	) ;
 
 #-------------------------------------------------------------------------
@@ -330,15 +335,22 @@ END
 
 sub indexdir  {
 	my $type=$_[0] ;
-	my $vars=$_[1] ;
+	my $varpaint =$_[1] ;
+	my $var =$_[2] ;
 	# Defaults
-	my $file = defined ($$var{'indexdir.file'}) ? $$var{'indexdir.file'} : "wbbdir.cfg" ; 
-	my $dir =  defined ($$var{'indexdir.dir'}) ? $$var{'indexdir.dir'} : "." ;
-	my $sep =  defined ($$var{'indexdir.sep'}) ? $$var{'indexdir.sep'} : " <br> " ; 
 
-	my @varsto_paint=split /:/, $vars ; 
+	my $file = defined ( $$var{'macros.indexdir.file'}) ? $$var{'macros.indexdir.file'} :  $defs{'macros.indexdir.file'} ;
+	my $sep =  defined ( $$var{'macros.indexdir.sep'} ) ? $$var{'macros.indexdir.sep'}  :  $defs{'macros.indexdir.sep'}  ;
+	my $dirs =  defined ( $$var{'macros.indexdir.dir'} ) ? $$var{'macros.indexdir.dir'}  :  $defs{'macros.indexdir.dir'}  ;
+	my $style= defined ( $$var{'macros.indexdir.style'})? $$var{'macros.indexdir.style'}:  $defs{'macros.indexdir.style'};
+	debug 1, "Aqui var macros vale $$var{'macros.indexdir.listingvar'}" ;
+	my ($vartocheck, $value ) = split /:/, defined ($$var{'macros.indexdir.listingvar'}) ? $$var{'macros.indexdir.listingvar'} : $defs{'macros.indexdir.listingvar'}  ;
+
+
+
+	my @varsto_paint=split /:/, $varpaint ; 
 	my $varindex = shift (@varsto_paint) ;
-	debug (1, "processing indexdir directive") ;
+	debug (1, "processing indexdir macros.indexdir.dir =  $$var{'macros.indexdir.dir'}  def=  $$defs{'macros.indexdir.dir'}  directive now") ;
 #	print STDERR "vars content =$vars\n" ;
 #	print STDERR "key index= $varindex , other vars are : " . join "," , @varsto_paint  ."\n" ; 
 	my $txt ="" ;
@@ -349,13 +361,18 @@ sub indexdir  {
 
 	my %hash_temporal ;
 	my %listing ;
+	debug 1, "directory is $dir" ;
+	foreach my $dir (split /\s+/ , $dirs) {
 	 opendir DIR, $dir ;
 	my $direntry ;
                 while ($direntry =readdir (DIR) )  {
-                        next if ($direntry eq "." ) ;
-                        next if ($direntry eq ".." ) ;
-                        next unless -d $direntry ; 
+#			debug (1,"direentry= $direntry");
+                        next if ($direntry =~ /^\..*/ )  ;
+#			debug (1,"Se saltan los puntos, direntry eq $direntry") ;
+                        next unless -d $direntry ;
+#			debug (1, "hay que leer el fichero $direntry\/$file") ;
 			if (-r "$direntry\/$file" ) { # Only index directories with the propper file
+			   debug (1,"reading file $direntry\/$file") ;
 			   %hash_temporal = () ; # Empty the temporal hash 
 #			   print STDERR  "reading $direntry\/$file\n" ;
 			   main::readVars ( "$direntry\/$file" , "-" , \%hash_temporal ) ;
@@ -367,9 +384,10 @@ sub indexdir  {
 					if ($i < (@varsto_print ) -1 ) { $description .= $sep ; }
 			  }
 #			  print STDERR "description created = $description\n" ;
-
-			 
-			  if( ($type eq "ul") || ($type eq "ol") ) {
+			 debug (1, "vartocheck = $vartocheck value $hash_temporal{$vartocheck} valuetocheck=$value") ;
+                         if ( ($vartocheck eq "all") || (defined ($hash_temporal{$vartocheck}) && ( $hash_temporal{$vartocheck} eq $value )))  {
+			 debug (1,"si que se imprime la info") ;
+			 if( ($type eq "ul") || ($type eq "ol") ) {
 				 $listing{"$hash_temporal{$varindex}:$direntry"} = "<li><a href=\"$direntry/\">$hash_temporal{$varindex}</a>$description</li>\n" ;
 #				 print STDERR "clave  = $hash_temporal{$varindex}:$direntry \n" ; 	
 			 }
@@ -378,13 +396,17 @@ sub indexdir  {
 				  $listing{"$hash_temporal{$varindex}:$direntry"} = "<dt><a href=\"$direntry/\">$hash_temporal{$varindex}</a></dt>\n<dd>$description</dd>\n" ;
 			}
 	  		   
+			} 
+			else {debug( 1, "Found var $vartocheck set to $value" ) ; }
 			}
-			else { debug (1,  "found directory, $tmp, but not file $file inside it" ) ; }
+			else { debug (1,  "found directory, $direntry, but not file $$var{'macros.indexdir.file'} inside it" ) ; }
 		}
+	}
 	# Join all all the listing 	
 	foreach my $k  (sort keys %listing ) {
 			$txt .= $listing{$k} ;
 			}
+	
 	#  end and return 
 	if ($type eq "ul" )  { $txt .= "</ul>\n" ; }
         elsif ($type eq "ol") { $txt .= "</ol>\n" ; }
@@ -429,7 +451,7 @@ sub macro {
 		$lin = $1 . tablefromcsv($2,$3,$4,$5) .$6 ;}
 		elsif ($lin =~ /(.*)#indexdir\((.*),(.*)\)(.*)/ ) {
                         if ($lin =~ /\\#indexdir/ ) {  print "STDERR es un comentario \n" ;$lin =~ s/\\#indexdir/#indexdir/ ; next ;}
-                $lin = $1 . indexdir ($2,$3) . $4 ; }
+                $lin = $1 . indexdir ($2,$3,$var) . $4 ; }
 		elsif ($lin =~ /(.*)#setvar\((.*),(.*)\)(.*)/ ) { # Sevar solamente fija una variable
 			if ($lin =~ /\\#setvar/ ) { next ; }
 			$$var{$2} = $3  ;   $lin =  $1 . $4 ; 

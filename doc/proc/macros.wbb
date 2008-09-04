@@ -105,5 +105,36 @@ Y lo ultimo seria una description por years<p>
 <p>
 #indexdir(dl,year:title:description)
 
+Actualización 2008/09/04 para solo procesar algunos indices en funcion de una variable
+macros.indexdir.listingvar ,por defecto tiene el valor "all:all", indicando que se 
+impriman todas, sin embargo si se pone a nombrevariable:valor, solo imprimirá aquellas
+variables que lo tengan puesto.
+<p>
+Se puede emplear la  macro setvar para fijar la variable, por ejemplo
+haciendo setvar(macros.indexdir.listingvar,printable:yes)
+ #setvar(macros.indexdir.listingvar,printable:yes) 
+
+vemos que ahora la varialbe tiene de valor #var(macros.indexdir.listingvar) 
+<p>
+y que ahora si intentamos ver pruebas anteriores dan otro resultado:
+<p>
+
+ <strong>indexdir(ul,author)</strong>
+<p>
+dando como resultado
+<p>
+#indexdir(ul,author) 
+<p>
+
+ Algo mas complicado seria una lista ordenada por title y con la  descripcion:
+<p>
+<strong>\indexdir(ol,title:description)</strong>
+#indexdir(ol,title:description)
+<p>
+Y lo ultimo seria una description por years<p>
+<strong>indexdir(dl,year:title:description)</strong>
+<p>
+#indexdir(dl,year:title:description)
+
 <br>
 
