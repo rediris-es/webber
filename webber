@@ -67,9 +67,9 @@ my $copyright="Copyright 1996-2008, RedIRIS";
 getopts ("C:dfhmirHIt:v", \%opt );
 
 # Sets some webber vars  
-$var{'wbbRecursive'}   = ($opt{r} ) ? 1 : 0 ;
-$var{'wbbForceupdate'} = ($opt{f}) ?  1 : 0 ;
-$var{'wbbMakedir'}     = ($opt{m}  ?  0 : 1 ; 
+$wbbDef{'wbbRecursive'}   =  0 ;
+$wbbDef{'wbbForceupdate'} =  0 ;
+$wbbDef{'wbbMakedir'}     =  1 ; 
 
 if (defined $opt{h}) { &showHelp; }
 
@@ -93,6 +93,10 @@ $wbbDef{'wbbConfig'} = defined $ENV{'WBBCONFIG'} ?  $ENV{'WBBCONFIG'} : "webber.
 $wbbDef{'wbbConfig'} = defined ($opt{C} ) ?  $opt{C} : $wbbDef{'wbbConfig'} ;
 
 readVars (NormalizePath(  $wbbDef{'wbbConfig'}  ) , 'configuration', \%wbbDef ) ;
+
+$wbbDef{'wbbRecursive'}   = ($opt{r} ) ? 1 : $wbbDef{'wbbRecursive'} ;
+$wbbDef{'wbbForceupdate'} = ($opt{f}) ?  1 : $wbbDef{'wbbForceUpdate'}  ;
+$wbbDef{'wbbMakedir'}     = ($opt{m})  ?  0 :$wbbDef{'wbbMakedir'} ;
 
 $wbbDef{'wbbDebug'}  = defined $ENV{'WBBDEBUG'}   ?  $ENV{'WBBDEBUG'} : 10   ;
 
@@ -371,15 +375,16 @@ sub process {
   
    if  (($var{'wbbMakedir'} == 1  ) and  (not -d $target))
    {
+    debug (1,"creating path $target") ;
      mkpath ( untaint("$target") ,0,0755) ;
    }
-	else{ debug 1, " no se cumple condicion $opt{m}" ;}
+	else{ debug 1, " no se cumple condicion $var{'wbbMakedir'}  $opt{m}" ;}
 
   if (not -d $target ) { 		debug 0,  " ojo con -d target $target"; }
 
    $target .= "/$name$var{wbbExtension}";
    
-   if (not $var{'wbbForceupdate'} and (my $targetdate = (stat "$target")[9] )) {
+   if (($var{'wbbForceupdate'} ==0 )and (my $targetdate = (stat "$target")[9] )) {
       if ($stats[9]<=$targetdate) {
          print STDERR "$target is more recent than $page. Skipping\n";
          return;
@@ -533,7 +538,7 @@ sub ProcessDir {
       }
    }
    foreach my $page (@pages) {  process($page); }
-   if ($var{'wbbRecursive') {
+   if ($var{'wbbRecursive'}) {
       foreach my $dir (@dirs) { 
          chdir("./$dir"); 
          &ProcessDir(\%var); 

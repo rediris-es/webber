@@ -22,6 +22,17 @@ en webber es un poco "rara" por lo que hay que escribir al principio de la pagin
 <p>
 
 TIT: Como funciona webber?
+ 
+ Webber procesa ficheros con información contenida en variables, y después ejecuta una serie de funciones (procesadores) en un
+orden determinado sobre estos datos, grabando al final la salida, por esta filosofía es bastante geneérico, anque su uso fundamental
+es ala hora de escribir páginas HTML que mantengan una misma consistencia.
+<p>
+ Actualmente la definición de estas variables en webber es muy sencilla, las lineas qeue empiezan por "#" deben tener 
+una estructura de #varible= valor", pudiendo esta valor extenderser varias lineas (hasta que se encuentre otra linea
+que empieze por "#" .
+<p>
+Las lineas con dos almoadillas "##" son tratadas como comentarios.
+<p>
 
 TIT: Una primera página en webber
 
@@ -70,6 +81,7 @@ comodos sería poner:
  #webbo.src= file:$var(wbbRoot)/samples/doc/doc-template.html
  #webbo.dst= wbbOut
 </pre>
+<p>
 
 TIT: Uso de webber: Los procesadores.
 
