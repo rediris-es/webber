@@ -25,14 +25,18 @@ use strict ;
 #-------------------------------------------------------------------------
 sub debug {
         my @lines = @_ ;
-        my $level = shift @lines ;
-        if (defined (&main::debug)) { main::debug (@lines) ; }
+#        my $level = shift @lines ;
+        if (defined (&wbbdebug)) { wbbdebug ( @lines) ; }
+        elsif (defined main::debug) { main::debug (@lines) ; }
         else {
+         my $level = shift @lines ;
         my $line= join '', @lines ;
         chomp $line ;
         print STDERR "$line\n" ;
         }
-        }
+        }# End Funcion debug
+
+
 # End Funcion debug
 
 
