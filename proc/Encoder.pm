@@ -4,27 +4,32 @@ package Encoder;
 
 use File::Temp;
 use Encode;
+#use strict ;
 
 #-------------------------------------------------------------------------
 # Function: debug 
 #-------------------------------------------------------------------------
 sub debug {
         my @lines = @_ ;
-        my $level = shift @lines ;
-        if (defined (&main::debug)) { main::debug (@lines) ; }
+#        my $level = shift @lines ;
+        if (defined (&wbbdebug)) { wbbdebug ( @lines) ; }
+        elsif (defined main::debug) { main::debug (@lines) ; }
         else {
+         my $level = shift @lines ;
         my $line= join '', @lines ;
         chomp $line ;
         print STDERR "$line\n" ;
         }
-        }
+        }# End Funcion debug
+
+
 
 my $name=       "Encoder";
 my $version=    "0.1";
 
 my %def = (
-	'encoder.targetencoding' => 'UTF-8' ,
-	'encoder.varstoencode'   => 'wbbIn,wbbOut,title,subtitle' 
+	'encoder.targetencoding' => 'utf8' ,
+	'encoder.varstoencode'   => 'wbbIn wbbOut title subtitle' 
 	) ;
 
 sub info { print "$name v$version: Transforms an input file tree encoded with any charset to an user defined output charset\n"; }
@@ -56,12 +61,13 @@ FINAL
 sub translate
 {
 
-  $rv = shift ;
+  my $rv = $_[0] ;
   
   my $targetencoding = defined ($$rv{'encoder.targetencoding'}) ? $$rv{'encoder.targetencoding'}  : $def{'encoder.targetencoding'} ;
-  my @vars = split /,/ , defined ($$rv{'encoder.varstoencode'}) ? $$rv{'encoder.varstoencode'}    : $def{'encoder.varstoencode'} ;
-
-  debug (1,"Encoding to $targetencoding vars= @varv") ;
+  my $tmp =  defined ($$rv{'encoder.varstoencode'}) ? $$rv{'encoder.varstoencode'}    : $def{'encoder.varstoencode'} ;
+  my @vars= split /\s+/ , $tmp ;
+  debug (1, "$def'encoder.varstoencode'} is this ") ;
+  debug (1,"Encoding to $targetencoding tmp =$tmp  vars= @vars") ;
 
   foreach my $vartoencode  (@vars )  {
 	debug (3,"Encoding to $targetencoding  result of $vartoencode value $$rv{$vartoencode}");
