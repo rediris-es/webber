@@ -16,7 +16,7 @@ use File::Find;
 use File::Spec;
 require HTML::LinkExtor;
 use POSIX ;
-use strict ;
+#use strict ;
 
 
 
@@ -118,12 +118,19 @@ FINAL
 sub do_cpfile {
  my $fn = shift;
  my ($origen, $destino, $mtime_origen, $mtime_destino) ;
- $origen= getcwd() ."/$fn" ;
+my $fullpath=0 ;
+my $relpath ;
+if   ($fn =~ /^\//)  {
+		($origen , $relpath) = split /:/,  $fn ; 
+		$fullpath=1 ;  } 
+else {  $origen= getcwd() ."/$fn" ; }
+
  if (($mtime_origen =(stat($origen))[9])== NULL) {
   debug (0, "Error NO existe fichero $fn");
   return;
  }
- $destino = $origen ;
+if ( $fullpath == 1)  {  $destino = getcwd() . "/$relpath" . basename ($origen) ;  }
+	else {    $destino = $origen ; }
  $destino =~  s/^$wbbSourceRoot/$wbbTargetRoot/ ;
  debug (1, "debug origen = $origen    dst=$destino") ;
  if (($mtime_destino=(stat ($destino))[9]) !=NULL) {
@@ -131,6 +138,7 @@ sub do_cpfile {
   if ($mtime_origen > $mtime_destino) { 
    ## COPIAR , origen, $DESTINo) ; 
     debug (1, "copy ($origen,$destino)")  ;
+   print STDERR "do_cpfile 1 copy $origen -> $destino\n" ;
    copy ($origen,$destino) ;
   }
  } 
@@ -139,6 +147,7 @@ sub do_cpfile {
   if (!-d $ruta_destino) { mkpath ($ruta_destino,0,0755) ; }
   ## copiar , $origen, destino
   debug (1, "copy ($origen, $destino)") ;
+   print STDERR "do_cpfile 2 copy $origen -> $destino\n" ;
   copy ($origen,$destino) ;
  }
 }
@@ -197,7 +206,7 @@ sub do_work
 sub copyfiles  {
  my $lin="" ;
  $var = $_[0] ;
-
+ print STDERR "procesing $$var{'wbbSource'}\n"  ;
  if ($$var{'wbbInteractive'} eq "1") {
 	debug (2, "Modo CGI no s hace nada") ;
 	}
@@ -234,6 +243,7 @@ else {
   }
  }
  for my $f (split /[\s]+/, $fileList) {
+ debug (3 , "going to copy $f") ;
   do_cpfile($f);
  }
  my $p = HTML::LinkExtor->new(\&do_work, "");
@@ -247,6 +257,7 @@ else {
 #----------------------------------------------------------------------
 sub wbbCopyRecursive(&@) {
     my ($code, $src, $dst) = @_;
+    print STDERR "wbbCopyRecursive code=$code src=$src dst=$dst\n" ;
     my @src = File::Spec->splitdir($src);
     pop @src unless defined $src[$#src] and $src[$#src] ne '';
     my $src_level = @src;
@@ -266,7 +277,7 @@ sub wbbCopyRecursive(&@) {
 # wbbCopyDir
 #----------------------------------------------------------------------
 sub wbbCopyDir {
-    wbbCopyRecursive { -d $_[0] ? do { mkdir($_[1]) unless -d $_[1] } : copy(@_) } @_;
+    wbbCopyRecursive { -d $_[0] ? do { mkdir($_[1]) unless -d $_[1] } :print  STDERR "wbbCopyDir $_[0] -> $_[1]\n" ;  copy(@_) } @_;
 }
   
 

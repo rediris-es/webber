@@ -38,8 +38,12 @@ sub info {
 my %defs = (
 	'language.changename' => "1" , 
 	'language.detectpattern' => '(.+)\.(..)$' ,
-	'language.writepattern' => '%N.html.%L' ,
+	'language.writepattern' => '%N%E.%L' ,
 	'language.default' => "es" ,
+	'filelang.linkfix.vars' => "wbbOut" ,
+	'filelang.linkfix.detectpattern' => '<a.*href.*=.*["\'](.*\.\w\w\.(?:php|html))["\']' ,
+	'filelang.linksys.namepattern' => '(.*)\.(.*)\.(.*)$' ,
+	'filelang.linkfix.newpattern' => '%1.%3.%2' ,
 	) ;
 
 sub help
@@ -86,9 +90,8 @@ internationalized web servers
 
 if  #language.changename  is set to "nolang", the processor will remove th "lang" from the name
 of a file, so if the original file is "name.CC.wbb", webber will change the name to
-"name.html" (by default). Be careful, when webbering , if you want to have only a language
-version use "webber *es.wbb" and not "webber *.wbb" . Mote: for the HTML extension will
-use wbbExtension 
+"name.EXT" (by default). Be careful, when webbering , if you want to have only a language
+version use "webber *es.wbb" and not "webber *.wbb" . Mote: for EXT is the value of wbbExtension
 
 Usage: incorporate Filelang::filelang to the list of proccessors
 at the beginning of them.
@@ -140,8 +143,8 @@ sub filelang {
 		# Interactive mode not doing so much
 		 $$rv{"wbbDateMeta"} = POSIX::strftime ("%Y-%m-%d", localtime);
    		 $$rv{"wbbDateWeb"}  = POSIX::strftime ("%d/%m/%Y", localtime);
-		 $$rv{'wbbLang'} = code2language ($$rv{'language.default'} ) ;
-		 $$rv{'wbbLangcode'} = $$rv{'language.default'} ;
+		 $$rv{'wbbLangname'} = code2language ($$rv{'language.default'} ) ;
+		 $$rv{'wbbLang'} = $$rv{'language.default'} ;
 
 		}
 
@@ -168,8 +171,8 @@ sub filelang {
 		}
 		else {$name=$file ; }
 		
-		 $$rv{'wbbLang'} = code2language ($lang) ;
-		 $$rv{'wbbLangcode'} = $lang ;
+		 $$rv{'wbbLangname'} = code2language ($lang) ;
+		 $$rv{'wbbLang'} = $lang ;
 
 	
 		#Changing the name ?
@@ -180,6 +183,7 @@ sub filelang {
 		my $newname=   $$rv{'language.writepattern'} ;
 		$newname =~ s/%N/$name/ ;
 		$newname =~ s/%L/$lang/ ;
+		$newname =~ s/%E/$$rv{'wbbExtension'}/ ;
 			
 		$$rv{'wbbTarget'} =  join ("/", @dirs)  . "/" . $newname ;				
 		}
@@ -199,13 +203,57 @@ sub filelang {
 sub langreduction {
 	my $rv = shift ;
 	
-	if (defined $$rv{'wbbLangcode'} ) {
+	if (defined $$rv{'wbbLang'} ) {
 		foreach my $var (keys %$rv) {
-			if ($var =~ /(.+)-$$rv{'wbbLangcode'}/ ) { $$rv{$1} = $$rv{$var} } ; }
+			if ($var =~ /(.+)-$$rv{'wbbLang'}/ ) { $$rv{$1} = $$rv{$var} } ; }
 	}
 
 }
 	
+
+
+sub linkfix  { 
+	my $rv= shift ;
+	my $banner= "$name\:\:linkfix : " ;
+	$$rv{'wbbDebug'} =10 ;
+	my $count=0 ;
+	debug (1, "$banner se ejecuta") ;
+	my $vars = defined ($$rv{'filelang.linkfix.vars'}) ? $$rv{'fileleng.linkfix.vars'} : $defs{'filelang.linkfix.vars'} ;
+	my $regex= defined ($$rv{'filelang.linkfix.detectpattern'}) ? $$rv{'filelang.linkfix.detectpattern'} : $defs{'filelang.linkfix.detectpattern'} ;
+	my $regexfilename=  defined ($$rv{'filelang.linksys.namepattern'}) ? $$rv{'filelang.linksys.namepattern'} : $defs{'filelang.linksys.namepattern'} ;
+	my $new= defined ($$rv{'filelang.linkfix.newpattern'} ) ? $$rv{'filelang.linkfix.newpattern'} : $defs{'filelang.linkfix.newpattern'} ; 
+	debug (1, "$banner processing vars $vars") ;
+#	print STDERR "Se ejecuta $banner con $vars\n" ;
+	foreach my $var (split /\s+/, $vars)  {
+		my $txt= $$rv{$var} ;
+		debug (2, "processing var $var") ;
+#		debug (0, "LINKFIX=\n$txt" ) ;
+#		return ;
+#		print  STDERR "$banner processing var $var\n" ;
+		while ($txt =~ /$regex/ ) {
+			my $filename= $1;
+ #                       print STDERR "Name $filename detectado con $regex\n" ;
+			if ($filename =~ /\/home\/spool\/WWW\/repositorio\/WWW.pre\// ) { $filename =~ s/\/home\/spool\/WWW\/repositorio\/WWW.pre\/// ; }
+			$filename =~ /$regexfilename/ ;
+                        my $uno=$1 ;
+                        my $dos=$2 ;
+                        my $tres=$3 ;
+              #ESTE          print STDERR "filename= $filename regex= $regexfilename uno=$uno dos =$dos tres=$tres\n" ;
+			my $newname = $new ;
+			$newname =~ s/\%1/$uno/ ; 
+			$newname =~ s/\%2/$dos/ ;
+			$newname =~ s/\%3/$tres/ ;
+			debug (0,"LINKFIX: Cambiado en $$rv{'wbbSource'} en variable $var valor $filename por $newname") ;
+		#ESTE	print "LINKFIX: Cambiado en $$rv{'wbbSource'} en variable $var valor $filename por $newname\n" ;
+			$txt=~ s/$filename/$newname/ ;
+			$count++ ;
+			}
+#		print STDERR "$banner links correguidos en $$rv{'wbbSource'} = $count\n" ;
+		debug (1," $banner links correguidos en $$rv{'wbbSoruce'} var $var = $count\n") ; 
+		$$rv{$var} = $txt ; 
+		}
+
+}
 
 
 if ($0 =~ /$name/) { &help; die ("\n"); }

@@ -66,11 +66,11 @@ sub translate
   my $targetencoding = defined ($$rv{'encoder.targetencoding'}) ? $$rv{'encoder.targetencoding'}  : $def{'encoder.targetencoding'} ;
   my $tmp =  defined ($$rv{'encoder.varstoencode'}) ? $$rv{'encoder.varstoencode'}    : $def{'encoder.varstoencode'} ;
   my @vars= split /\s+/ , $tmp ;
-  debug (1, "$def'encoder.varstoencode'} is this ") ;
+  debug (1, "encoder.varstoencode' = $tmp   ") ;
   debug (1,"Encoding to $targetencoding tmp =$tmp  vars= @vars") ;
 
   foreach my $vartoencode  (@vars )  {
-	debug (3,"Encoding to $targetencoding  result of $vartoencode value $$rv{$vartoencode}");
+	debug (3,"Encoding $vartoencode  to $targetencoding   value $$rv{$vartoencode}");
 	$$rv{$vartoencode} = encode ($targetencoding, $$rv{$vartoencode}) ;
 	debug (3,"Result is $$rv{$vartoencode}" ) ;
 }
