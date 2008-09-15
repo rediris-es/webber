@@ -5,6 +5,23 @@
 
 package DumpVars;
 
+#-------------------------------------------------------------------------
+# Function: debug 
+#-------------------------------------------------------------------------
+sub debug {
+        my @lines = @_ ;
+        if (defined (&wbbdebug)) { wbbdebug (@lines) ; }
+        elsif (defined main::debug) { main::debug (@lines) ; }
+        else {
+          my $level = shift @lines ;
+        my $line= join '', @lines ;
+        chomp $line ;
+        print STDERR "$line\n" ;
+        }
+}
+# End Funcion debug
+
+
 my $name=	"DumpVars";
 my $version=	"1.0";
 
@@ -39,3 +56,6 @@ sub dumpVars
 if ($0 =~ /$name/) { &help; die ("\n"); }
 
 1;
+
+sub debugvar  {
+}

@@ -5,6 +5,10 @@
 
 package Menu;
 
+use strict ;
+#no strict "subs";
+
+
 #-------------------------------------------------------------------------
 # Function: debug 
 #-------------------------------------------------------------------------
@@ -28,16 +32,16 @@ sub  xml2array {
       	my @ret ;
 	foreach my $i (@tmp) {
 		debug (3, "menuxmlarray processing $i");
-		$i =~ /<text>(.*)<\/text>/si ;
-		my $text =$1 ;
-		$i =~ /<url>(.*)<\/url>/si ;
-		$url =$1 ;
-		debug (3, "text=$text , url=$url") ;
-		my $rh = {
-			'text' => $text ,
-			'url'  => $url
-		} ;
-	push @ret, $rh ;
+		my $rh = {} ;
+		my $tmp = $i ;
+		while ($tmp =~ /<(.*)>(.*)<\/\1>/msi ) {
+			my $key= $1 ;
+			my $value =$2 ; 
+			$$rh{$key} = $value ;
+			debug (3, "key=$key , value=$value") ;
+			$tmp =~ s/<$key>$value<\/$key>//gi ; 
+		}		
+		push @ret, $rh ;
         }
 	return @ret ;
 }
@@ -50,7 +54,8 @@ my %defs= (
 	'menu.type'	=> 'li',
 	'menu.src'	=> 'menu.var',
 	'menu.target'	=> 'menuhere',
-	'menu.template' => "<li><a href=\"\%url\">\%text</a></li>\n"
+	'menu.li.template' => "<li><a href=\"\%url\">\%text</a></li>\n" , 
+	'menu.td.template' => "<td><a href=\"\%url\">\%text</a></td>\n" 
 ) ;
 
 
@@ -90,28 +95,67 @@ $name must be used as (one of) the last processor(s).
 
 $name uses the following Webber variables:
 
-#menu.pre : HTML code before the menu, (class definition,etc) default= $defs{'menu.pre'}
-#menu.post: HTML code after the menu, (end of list, etc) defaults = $defs{'menu.post'}
-#menu.type: to have different kind of listing by now only "li", (default), 
-#menu.template: Default template , by now \n\t $defs{'menu.template'}
-#menu.src: webber var that contains the menu $defs{'menu.src'}
-#menu.target: webber var in which we will put the HTML code , defaults $defs('menu.target'}
+#menu.src: webber var that contains the menu $defs{'menu.src'} , format is src:dst , 
+wehere src and dst are webber vars, this allow to process more than one menu in the
+same page.
+
+The following vars depends on the value of the previus src definition.
+#menu.\$src.pre : HTML code before the menu, (class definition,etc) default= $defs{'menu.pre'}
+#menu.\$src.post: HTML code after the menu, (end of list, etc) defaults = $defs{'menu.post'}
+#menu.\$type: to have different kind of listing by now only "li", (default), 
+#menu.\$template: Default template , by now \n\t $defs{'menu.template'}
+
+ Replace \$src with the name of the src part in the menu.src definition
+
+Note: the format of the menu is the following XML:
+<menuitem>
+	<key>value</key>
+	..
+	<keyn>value</key>
+</menuitem>
+	
+   Names of the keys are matched with in the template, replacing the \%key with the key
+value.
+
 FINAL
 }
 
 sub  menu
 {
 	my $rh= $_[0] ;
-	debug( 1, "(Menu:menu se ejecuta\n") ;
-	$pre = defined ($$rh{'menu.pre'} )  ? $$rh{'menu.pre'} : $defs{'menu.pre'} ;
-	$post= defined ($$rh{'menu.post'})  ? $$rh{'menu.post'}: $defs{'menu.post'};
-	$type= defined ($$rh{'menu.type'})  ? $$rh{'menu.type'}: $defs{'menu.type'};
-	$template = defined ($rh{'menu.template'}) ? $$rh{'menu.template'} : $defs{'menu.template'} ;
-	$src = defined ($$hrh{'menu.src'})  ? $$rh{'menu.src'} :   $defs{'menu.src'} ;
-	$target=defined ($$rh{'menu.target'})? $$rh{'menu.target'}: $defs{'menu.target'} ;
-	debug (2, "menuvar= $src = $$rh{$src}") ;
+	debug( 1, "Menu:menu se ejecuta\n") ;
+	my $pre = defined ($$rh{'menu.pre'} )  ? $$rh{'menu.pre'} : $defs{'menu.pre'} ;
+	my $post= defined ($$rh{'menu.post'})  ? $$rh{'menu.post'}: $defs{'menu.post'};
+	my $type= defined ($$rh{'menu.type'})  ? $$rh{'menu.type'}: $defs{'menu.type'};
+	my ($template, $templateli, $templatetd) ;
+	if ($type eq "li") {
+	 $templateli = defined ($$rh{'menu.li.template'}) ? $$rh{'menu.li.template'} : $defs{'menu.li.template'} ;
+	}
+	elsif ($type eq "td") {
+	 $templatetd = defined ($$rh{'menu.td.template'}) ? $$rh{'menu.td.template'} : $defs{'menu.td.template'} ;
+	}
+	my $menusrc = defined ($$rh{'menu.src'})  ? $$rh{'menu.src'} :   $defs{'menu.src'} ;
+	debug 2, "Menus a procesar : $menusrc" ; 
+	foreach my $src  (split /\s+/, $menusrc) {
+	my ($var , $target ) = split /:/ , $src ;
+	debug (2, "Variable origen =$var se escribira el menu en $target") ;
+	debug(2, "variables que afectan a este menu : menu.$var.pre menu.$var.post menu.$var.type") ;
+	$pre = defined ($$rh{"menu.$var.pre"} ) ? $$rh{"menu.$var.pre"}  : $pre ;
+	$post= defined ($$rh{"menu.$var.post"}) ? $$rh{"menu.$var.post"} : $post ;
+	
+	if (defined ($$rh{"menu.$var.type"} ) && $$rh{"menu.$var.type"} eq "li") {
+		$template= defined ($$rh{"menu.$var.template"}) ? $$rh{"menu.$var.template"} : $templateli ; 
+		debug (2, "setting output template to li style = $template") ;
+		}
 
-	my @entries = xml2array ( $$rh{$src} ) ;
+	else {
+		 $template= defined ($$rh{"menu.$var.template"}) ? $$rh{"menu.$var.template"} : $templatetd ;
+		debug (2,"setting output template to td style = $template");
+		 }
+   
+	debug (2, "Menu  $var contenido $$rh{$var}") ;
+   	debug (2, "template= $template , templateli=$templateli templatetd=$templatetd") ;  
+	my @entries = xml2array ( $$rh{$var} ) ;
 	my $output = $pre;
 	foreach my $i (@entries) {
 		my $lin= $template ;
@@ -125,6 +169,7 @@ sub  menu
 	$output .= $post ;
 	debug (2, "putting output in $target value is $output") ;
 	$$rh{$target} = $output ;
+	}
 	
 }
 
