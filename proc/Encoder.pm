@@ -4,6 +4,7 @@ package Encoder;
 
 use File::Temp;
 use Encode;
+use Encode::Guess ; 
 #use strict ;
 
 #-------------------------------------------------------------------------
@@ -29,7 +30,7 @@ my $version=    "0.1";
 
 my %def = (
 	'encoder.targetencoding' => 'utf8' ,
-	'encoder.varstoencode'   => 'wbbIn wbbOut title subtitle' 
+	'encoder.varstoencode'   => 'wbbIn wbbOut title subtitle iris-smHijos-es iris-smPadres-es' 
 	) ;
 
 sub info { print "$name v$version: Transforms an input file tree encoded with any charset to an user defined output charset\n"; }
@@ -71,8 +72,19 @@ sub translate
 
   foreach my $vartoencode  (@vars )  {
 	debug (3,"Encoding $vartoencode  to $targetencoding   value $$rv{$vartoencode}");
-	$$rv{$vartoencode} = encode ($targetencoding, $$rv{$vartoencode}) ;
+	my $current= guess_encoding ($$rv{$vartoencode} , qw /ascii ascii-ctrl iso-8859-1 null utf-8-strict utf8/ );
+	
+	if (ref($current)) {
+	my $name= $current->name ;
+	print STDERR  (3,"Current encoding of $vartoencode in file $$rv{'wbbSource'} is $name\n") ;
+	if (($name ne $targetencoding )  && ( $name !~ /ascii/ ) ){
+		#from_to($$rv{$vartoencode} , $name , $targetencoding )  ;
+#		$$rv{$vartoencode} = encode($targetencoding , decode ($name, $$rv{$vartoencode})) ;
+	}
+	else { $$rv{$vartoencode} = encode ($targetencoding , $$rv{$vartoencode} ) ; }
 	debug (3,"Result is $$rv{$vartoencode}" ) ;
+	}
+	else {  print STDERR "Cant' detect the encoding of $vartoencode\n" ; }
 }
 
 
