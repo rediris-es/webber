@@ -254,7 +254,7 @@ sub includefile {
 	my $file= $_[0] ;
 	my $search= $_[1];
 	my $replace=$_[2];
-	print (2, "processing includefile directive\n" ) ;
+	debug (2, "processing includefile directive\n" ) ;
 	my $txt ;
 	my $lin ;
 	open FILE , $file || print STDERR "ERROR file $file not found!!!\n" ;

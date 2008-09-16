@@ -461,13 +461,11 @@ sub process {
 
 # This is where the real magic is done
 #
-      close STDOUT ;
 
-      open STDOUT , ">".untaint($var{'wbbTarget'} . $var{'wbbexttmp'} ) || die "Can't write to $target.$var{'wbbexttmp'}\n" ; 
+      open  FILE  , ">".untaint($var{'wbbTarget'} . $var{'wbbexttmp'} ) || die "Can't write to $target.$var{'wbbexttmp'}\n" ; 
 
-    print STDOUT  $var{'wbbOut'} ;
-   select (STDOUT);
-   close (STDOUT);
+    print FILE   $var{'wbbOut'} ;
+   close (FILE);
 # Now the move
    unlink $var{'wbbTarget'}  if -e  $var{'wbbTarget'}   ;
    rename $var{'wbbTarget'}  . $var{'wbbexttmp'} , $var{'wbbTarget'}  ;
