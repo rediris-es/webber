@@ -29,7 +29,7 @@ my $name=       "Encoder";
 my $version=    "0.1";
 
 my %def = (
-	'encoder.targetencoding' => 'utf8' ,
+	'encoder.targetencoding' => 'utf-8' ,
 	'encoder.varstoencode'   => 'wbbIn wbbOut title subtitle iris-smHijos-es iris-smPadres-es' 
 	) ;
 
@@ -72,19 +72,24 @@ sub translate
 
   foreach my $vartoencode  (@vars )  {
 	debug (3,"Encoding $vartoencode  to $targetencoding   value $$rv{$vartoencode}");
-	my $current= guess_encoding ($$rv{$vartoencode} , qw /ascii ascii-ctrl iso-8859-1 null utf-8-strict utf8/ );
+	my $current= guess_encoding ($$rv{$vartoencode} , qw /ascii ascii-ctrl iso-8859-1 null utf-8  utf-8-strict utf8/ );
 	
 	if (ref($current)) {
 	my $name= $current->name ;
-	print STDERR  (3,"Current encoding of $vartoencode in file $$rv{'wbbSource'} is $name\n") ;
+	debug   (3,"Current encoding of $vartoencode in file $$rv{'wbbSource'} is $name\n") ;
 	if (($name ne $targetencoding )  && ( $name !~ /ascii/ ) ){
 		#from_to($$rv{$vartoencode} , $name , $targetencoding )  ;
-#		$$rv{$vartoencode} = encode($targetencoding , decode ($name, $$rv{$vartoencode})) ;
+		my $text = decode ($name , $$rv{$vartoencode}) ;
+		my $detect= guess_encoding ($text, qw /ascii ascii-ctr iso-8859-1 null utf-8 utf-8-strict utf8/) ;
+		my $n= $detect->name ;
+		debug (3,, "Current encoding temporal is $n\n") ;
+#		$$rv{$vartoencode} =  decode ($name, $$rv{$vartoencode}) ;
+		$$rv{$vartoencode} = encode ("utf-8",  $text );
 	}
-	else { $$rv{$vartoencode} = encode ($targetencoding , $$rv{$vartoencode} ) ; }
+	else { $$rv{$vartoencode} =  $$rv{$vartoencode}  ; }
 	debug (3,"Result is $$rv{$vartoencode}" ) ;
 	}
-	else {  print STDERR "Cant' detect the encoding of $vartoencode\n" ; }
+	else {  debug 3, "Cant' detect the encoding of $vartoencode\n" ; }
 }
 
 
