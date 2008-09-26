@@ -23,9 +23,13 @@ sub debug {
 # End Funcion debug
 
 
+my %defs = (
+	'vars.pathvars.wbbroot' => 'wbbRoot' 
+	);
 
 my $name=	"Vars";
 my $version=	"1.0";
+
 
 sub info {
    print "$name v$version: Manipulate Webber Vars\n";
@@ -37,8 +41,8 @@ sub help
 $name 
 
 Webber processor, version $version
-This program must run inside Webber.ç
-º
+This program must run inside Webber.
+
 This module implements different proccessor to manipulate Webber Vars.
 the Vars that are affected by this proccesor usually are defined
 in a webber vars.
@@ -68,14 +72,15 @@ another name, this processor allow to copy the old var and create a new
 one. Use the #vars.CopyVars, a white list of var_src:vars_dst pairs to define
 which vars to copy.
 
-Vars::SpecialVars
+Vars::PathVars
   Implements the following "special Vars":
   #vars.dep = Dep from wbbSourceRoot to the actual file (in number)
   #vars.pathtoroot = "Creates a Path" (concatation of "../.." to the wbbTargetRoot
   #vars.pathfromoot = "Path from the wbbTargetRoot to the file"
 
 Note: All this variables requires that file being webbered would  be in a directory
-below wbbTargetRoot  , it uses the wbbTarget vars to create the paths
+below #var.pathvars.wbbroot (defaults to $$defs{'var.pathvars.wbbroot'} , to work
+correctly.
 
 FINAL
 }
@@ -113,15 +118,14 @@ sub CopyVars
    else { debug 1, "Vars.CopyVars called, but vars.copyvars not defined" ; }
 }
 
-sub SpecialVars {
+sub PathVars {
 	my $rv = shift ;
-	debug 1, "Vars::Special Vars is started\n" ;
+	debug 1, "Vars::PathVars Vars is started\n" ;
 	if (defined ($$rv{'wbbInteractive'} && $$rv{'wbbInteractive'} eq "1")) {
 		debug  1, "Intectavtive mode not doing anything"; 
 		exit  ; }
-
-	debug 2, "checking paths, wbbTargetRoot=$$rv{'wbbTargetRoot'} wbbTarget=$$rv{'wbbTarget'}" ;
-	my $base= $$rv{'wbbTargetRoot'} ;
+	my $base= defined ($$rv{'vars.pathvars.wbbroot'} ) ? $$rv{'vars.pathvars.wbbroot'} : $defs{'vars.pathvars.wbbroot'} ;
+	debug 2, "checking paths, wbbTargetRoot=$base wbbTarget=$$rv{'wbbTarget'}" ;
 	my $filepath= $$rv{'wbbTarget'} ;
 	my $relpath= $filepath ;
 	$relpath =~ s/^$base// ;
