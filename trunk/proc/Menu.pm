@@ -34,12 +34,13 @@ sub  xml2array {
 		debug (3, "menuxmlarray processing $i");
 		my $rh = {} ;
 		my $tmp = $i ;
-		while ($tmp =~ /<(.*)>(.*)<\/\1>/msi ) {
+		while ($tmp =~ s/<(.*)>(.*)<\/\1>//msi ) {
 			my $key= $1 ;
 			my $value =$2 ; 
 			$$rh{$key} = $value ;
 			debug (3, "key=$key , value=$value") ;
-			$tmp =~ s/<$key>$value<\/$key>//gi ; 
+#			$tmp =~ s/<$key>$value<\/$key>//gi ; 
+			debug (3, "queda $tmp despues eliminacion de $key y $value\n" ) ;
 		}		
 		push @ret, $rh ;
         }
