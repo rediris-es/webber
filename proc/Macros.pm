@@ -266,7 +266,7 @@ sub includefile {
 		$txt .= encode_entities ($lin) ;
 	}
 	close FILE ;
-#	print STDERR "Se retornaria\n $txt\n" ;
+	#print STDERR "Se retornaria\n $txt\n" ;
 
 	return $txt ;
 }

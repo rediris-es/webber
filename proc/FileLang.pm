@@ -215,14 +215,15 @@ sub langreduction {
 sub linkfix  { 
 	my $rv= shift ;
 	my $banner= "$name\:\:linkfix : " ;
-	$$rv{'wbbDebug'} =10 ;
+	#$$rv{'wbbDebug'} =10 ;
 	my $count=0 ;
 	debug (1, "$banner se ejecuta") ;
-	my $vars = defined ($$rv{'filelang.linkfix.vars'}) ? $$rv{'fileleng.linkfix.vars'} : $defs{'filelang.linkfix.vars'} ;
+	my $vars = defined ($$rv{'filelang.linkfix.vars'}) ? $$rv{'filelang.linkfix.vars'} : $defs{'filelang.linkfix.vars'} ;
 	my $regex= defined ($$rv{'filelang.linkfix.detectpattern'}) ? $$rv{'filelang.linkfix.detectpattern'} : $defs{'filelang.linkfix.detectpattern'} ;
 	my $regexfilename=  defined ($$rv{'filelang.linksys.namepattern'}) ? $$rv{'filelang.linksys.namepattern'} : $defs{'filelang.linksys.namepattern'} ;
 	my $new= defined ($$rv{'filelang.linkfix.newpattern'} ) ? $$rv{'filelang.linkfix.newpattern'} : $defs{'filelang.linkfix.newpattern'} ; 
 	debug (1, "$banner processing vars $vars") ;
+#	print STDERR "$banner proccessing vars $vars\n" ;
 #	print STDERR "Se ejecuta $banner con $vars\n" ;
 	foreach my $var (split /\s+/, $vars)  {
 		my $txt= $$rv{$var} ;

@@ -92,7 +92,7 @@ sub incr {
 	my $level =$_[0] ;
 	my $poss = $_[1] ;
 	$poss ++ ;
-	#print ("incr called with $level, $poss \n") if $debug;
+	print ("incr called with $level, $poss \n") if $debug;
 	my $return ="" ;
 	$level="0" if ($level eq "") ;
 	my @codes= split /\./, $level ;
@@ -175,7 +175,7 @@ sub bodyfaq
 		debug( 5, "DEBUG: pushed $line \n") ;
 		}
 		
-       else { debug (2,  "DEBUG Not found $sep in $array[$i]");
+       else { print "DEBUG Not found $sep in $array[$i] \n" if $debug ;
 		push @lines, $array[$i] ; }
 	}
 
