@@ -24,7 +24,7 @@ sub debug {
 
 
 my %defs = (
-	'vars.pathvars.wbbroot' => 'wbbRoot' 
+	'vars.pathvars.wbbsourceroot' => 'wbbTargetRoot' 
 	);
 
 my $name=	"Vars";
@@ -79,7 +79,7 @@ Vars::PathVars
   #vars.pathfromoot = "Path from the wbbTargetRoot to the file"
 
 Note: All this variables requires that file being webbered would  be in a directory
-below #var.pathvars.wbbroot (defaults to $$defs{'var.pathvars.wbbroot'} , to work
+below #vars.pathvars.wbbsourceroot (defaults to $$defs{'vars.pathvars.wbbsourceroot'} , to work
 correctly.
 
 FINAL
@@ -124,15 +124,17 @@ sub PathVars {
 	if (defined ($$rv{'wbbInteractive'} && $$rv{'wbbInteractive'} eq "1")) {
 		debug  1, "Intectavtive mode not doing anything"; 
 		exit  ; }
-	my $base= defined ($$rv{'vars.pathvars.wbbroot'} ) ? $$rv{'vars.pathvars.wbbroot'} : $defs{'vars.pathvars.wbbroot'} ;
-	debug 2, "checking paths, wbbTargetRoot=$base wbbTarget=$$rv{'wbbTarget'}" ;
+	my $basevar= defined ($$rv{'vars.pathvars.wbbsourceroot'} ) ? $$rv{'vars.pathvars.wbbsourceroot'} : $defs{'vars.pathvars.wbbsourceroot'} ;
+	my $base = $$rv{$basevar} ;
+	debug 2, "checking paths, basevar =$basevar value base  Source start at =$base wbbTarget=$$rv{'wbbTarget'}" ;
 	my $filepath= $$rv{'wbbTarget'} ;
 	my $relpath= $filepath ;
 	$relpath =~ s/^$base// ;
 	my @dir = split /\//, dirname ($relpath) ;
 	my $count = @dir ;
-	$count-- ;
+	if ($count !=0 ) { $count-- ; }
 	$point="" ;
+	debug 2, "bucle for from o a $count\n" ;
 	for (my $i=0 ; $i!=$count; $i++ ) {
 		$point .= "../" ; 
 	}

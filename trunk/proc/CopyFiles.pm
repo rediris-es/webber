@@ -18,7 +18,6 @@ require HTML::LinkExtor;
 use POSIX ;
 #use strict ;
 
-#$SIG{ __WARN__ } = sub{ warn @_ unless $_[ 0 ] =~ /STDOUT reopened/ };
 
 
 #-------------------------------------------------------------------------
@@ -139,24 +138,16 @@ if ( $fullpath == 1)  {  $destino = getcwd() . "/$relpath" . basename ($origen) 
   if ($mtime_origen > $mtime_destino) { 
    ## COPIAR , origen, $DESTINo) ; 
     debug (1, "copy ($origen,$destino)")  ;
-   #print STDERR "do_cpfile 1 copy $origen -> $destino\n" ;
+   print STDERR "do_cpfile 1 copy $origen -> $destino\n" ;
    copy ($origen,$destino) ;
   }
  } 
  else {
-  debug 1, "fullpath debe no ser 1" ;
   my $ruta_destino=(fileparse($destino))[1]  ;
-  #print STDERR "Ruta destino es $ruta_destino\n" ;
-  if ((-e $ruta_destino)  && (-d $ruta_destino)) { }#print STDERR "la ruta $ruta_destino existe y es un directorio\n" ; }
-  if (!-d $ruta_destino) { }#print STDERR "llamada a makepath\n" ; mkpath ($ruta_destino,0,0755) ; }
+  if (!-d $ruta_destino) { mkpath ($ruta_destino,0,0755) ; }
   ## copiar , $origen, destino
   debug (1, "copy ($origen, $destino)") ;
-   #print STDERR "do_cpfile 2 copy $origen -> $destino\n" ;
-   if (-e $destino) {} #print STDERR  "$destino existe\n " ; }
-   my $dir= dirname ($destino) ;
-   if (-e $dir ) {} #print STDERR  "directorio $dir existe\n" ; }
-   if (-d $dir ) {} #print STDERR  "$dir es un directorio\n" ; }
-
+   print STDERR "do_cpfile 2 copy $origen -> $destino\n" ;
   copy ($origen,$destino) ;
  }
 }
@@ -215,7 +206,7 @@ sub do_work
 sub copyfiles  {
  my $lin="" ;
  $var = $_[0] ;
- #print STDERR "procesing $$var{'wbbSource'}\n"  ;
+ print STDERR "procesing $$var{'wbbSource'}\n"  ;
  if ($$var{'wbbInteractive'} eq "1") {
 	debug (2, "Modo CGI no s hace nada") ;
 	}
@@ -240,7 +231,7 @@ else {
   my $dst = $org;
   $dst =~  s/^$wbbSourceRoot/$wbbTargetRoot/ ;
   if (-d $org) {
-#   #print STDERR "CopyFiles: /bin/cp -Rp $org $dst\n" if ($wbbDebug);
+#   print STDERR "CopyFiles: /bin/cp -Rp $org $dst\n" if ($wbbDebug);
 #   system("/bin/cp -Rp $org $dst");
 
    debug (1, "CopyFiles: wbbCopyDir $org, $dst");;
@@ -266,7 +257,7 @@ else {
 #----------------------------------------------------------------------
 sub wbbCopyRecursive(&@) {
     my ($code, $src, $dst) = @_;
-    #print STDERR "wbbCopyRecursive code=$code src=$src dst=$dst\n" ;
+    print STDERR "wbbCopyRecursive code=$code src=$src dst=$dst\n" ;
     my @src = File::Spec->splitdir($src);
     pop @src unless defined $src[$#src] and $src[$#src] ne '';
     my $src_level = @src;
