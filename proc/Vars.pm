@@ -64,14 +64,20 @@ Vars::LazyEval use the webber var #vars.lazyeval to define a  while separated
 list of webber vars to be Lazy Evaluates
 
 Vars::CopyVars
- Copy the content of a webber Vars onto another one .
+ Copy the content of a webber Vars onto another one 
 
  Exmaple: You have an old Var definitin in which one variable is used for
 example for the "content" of the page, now you use another template with 
 another name, this processor allow to copy the old var and create a new
 one. Use the #vars.CopyVars, a white list of var_src:vars_dst pairs to define
 which vars to copy.
-
+  
+  The separator has different meanings:
+	: Means straight Copy src:dst copy src always to dst
+	:? means conditional copiy src:?dst copy src to dst if dst is not defined
+	:+ means addition after src:+dst . dst will have the value of dst concatenated 
+	with the value of src (same value if dst wasn't defined 
+ 
 Vars::PathVars
   Implements the following "special Vars":
   #vars.dep = Dep from wbbSourceRoot to the actual file (in number)
@@ -110,11 +116,23 @@ sub CopyVars
    if (defined $$rv{'vars.copyvars'} ) {    
         my @tmp = split /\s+/ , $$rv{'vars.copyvars'} ;
         foreach my $i (@tmp) {
+		if ($i =~ /(.*):+(.*)/ ) { # Concatenation
+		   my $src=$1 ;  my  $dst=$2 ;
+		   debug 3, "concatnationcopy :+ from $src to $dst" ;
+		  if (defined $$rv{$dst} ) {$$rv{$dst} .= $$rv{$src} ; }
+		  else {   $$rv{$dst} = $$rv{$src} ; }
+		}
+		elsif ($i =~ /(.*):?(.*)/ ) { #conditional
+		 my   $src=$1 ; my $dst=$2 ;
+		       $$rv{$dst} = $$rv{$src}  unless defined ($$rv{$dst});
+			debug 3, "conditional copy :? from $src to $dst" ;
+		}
+		else {
 		my ($src, $dst) = split /:/, $i ;
                 debug  3 ,"Goint to process $i src= $src copied to $dst " ;
 		$$rv{$dst} = $$rv{$src} ;
         	}
-        }
+        }}
    else { debug 1, "Vars.CopyVars called, but vars.copyvars not defined" ; }
 }
 

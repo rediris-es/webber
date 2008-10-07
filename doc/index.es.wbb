@@ -116,7 +116,7 @@ TIT: Procesadores weeber incluidos en la distribucion
 <dt><a href="proc/filelang.html">FileLang.pm</dt>
 	<dd>FileLang: Deteccion de idiomas, permite internacionacionalizacion de paginas</dd>
 
-<dt><a href="proc/macros.pm">Macros.pm</dt>
+<dt><a href="proc/macros.html">Macros.pm</A></dt>
 	<dd>Conjunto de Macros para realizar algunas tareas de forma automatica </dd>
 <dt>Maketoc.pm</dt>
 	<dd>Maketoc v1.0: TOC generation</dd>
@@ -126,6 +126,8 @@ TIT: Procesadores weeber incluidos en la distribucion
 	<dd>PrintIn v1.0: Copy #wbbIn into #wbbOut</dd>
 <dt>Slide.pm<dt>
 	<dd>Slide v1.0: Build slide-show pagesTable.pm=>Table v1.1: Include a table with #dbName into #wbbOut</dd>
+<dt><a href="proc/vars.html">Vars.pm</a></dt>
+	<dd>Vars. : Manipulate some Vars</dd>
 <dt>Webbo.pm</dt>
 	<dd>Webbo: v2.1: Incorporate variables into page templates<dd>
 </dl>
