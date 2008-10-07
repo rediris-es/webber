@@ -403,7 +403,7 @@ sub indexdir  {
 		}
 	}
 	# Join all all the listing 	
-	foreach my $k  (sort keys %listing ) {
+	foreach my $k (sort {uc($a) cmp uc($b)} keys %listing ) {
 			$txt .= $listing{$k} ;
 			}
 	
