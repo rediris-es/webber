@@ -343,16 +343,16 @@ sub indexdir  {
 	my $sep =  defined ( $$var{'macros.indexdir.sep'} ) ? $$var{'macros.indexdir.sep'}  :  $defs{'macros.indexdir.sep'}  ;
 	my $dirs =  defined ( $$var{'macros.indexdir.dir'} ) ? $$var{'macros.indexdir.dir'}  :  $defs{'macros.indexdir.dir'}  ;
 	my $style= defined ( $$var{'macros.indexdir.style'})? $$var{'macros.indexdir.style'}:  $defs{'macros.indexdir.style'};
-	debug 1, "Aqui var macros vale $$var{'macros.indexdir.listingvar'}" ;
+#	debug 1, "Aqui var macros vale $$var{'macros.indexdir.listingvar'}" ;
 	my ($vartocheck, $value ) = split /:/, defined ($$var{'macros.indexdir.listingvar'}) ? $$var{'macros.indexdir.listingvar'} : $defs{'macros.indexdir.listingvar'}  ;
 
 
 
-	my @varsto_paint=split /:/, $varpaint ; 
+	my @varsto_paint=split /:/, $varpaint ;
 	my $varindex = shift (@varsto_paint) ;
 	debug (1, "processing indexdir macros.indexdir.dir =  $$var{'macros.indexdir.dir'}  def=  $$defs{'macros.indexdir.dir'}  directive now") ;
 #	print STDERR "vars content =$vars\n" ;
-#	print STDERR "key index= $varindex , other vars are : " . join "," , @varsto_paint  ."\n" ; 
+#	print STDERR "key index= $varindex , other vars are : " . join "," , (@varsto_paint)  ."\n" ; 
 	my $txt ="" ;
 
 	if ($type eq "ul" )  { $txt .= "<ul>\n" ; }
@@ -361,49 +361,59 @@ sub indexdir  {
 
 	my %hash_temporal ;
 	my %listing ;
-	debug 1, "directory is $dir" ;
+#	debug 1, "directory is $dirs" ;
 	foreach my $dir (split /\s+/ , $dirs) {
+	#printf STDERR "DIR=$dir\n" ;
 	 opendir DIR, $dir ;
 	my $direntry ;
                 while ($direntry =readdir (DIR) )  {
+#			print STDERR "DIR_ENTRY=$direntry\n" ;
 #			debug (1,"direentry= $direntry");
                         next if ($direntry =~ /^\..*/ )  ;
 #			debug (1,"Se saltan los puntos, direntry eq $direntry") ;
-                        next unless -d $direntry ;
-#			debug (1, "hay que leer el fichero $direntry\/$file") ;
-			if (-r "$direntry\/$file" ) { # Only index directories with the propper file
-			   debug (1,"reading file $direntry\/$file") ;
+                        next unless -d "$dir\/$direntry" ;
+#			debug (1, "hay que leer el fichero $dir\/$direntry\/$file") ;
+			if (-r "$dir/$direntry\/$file" ) { # Only index directories with the propper file
+		#	   debug (1,"reading file $dir\/$direntry\/$file") ;
 			   %hash_temporal = () ; # Empty the temporal hash 
-#			   print STDERR  "reading $direntry\/$file\n" ;
-			   main::readVars ( "$direntry\/$file" , "-" , \%hash_temporal ) ;
+		#	   print STDERR  "reading $dir\/$direntry\/$file\n" ;
+			   main::readVars ( "$dir\/$direntry\/$file" , "-" , \%hash_temporal ) ;
 		
 			  # Temporaly creating the entry ...
 			  my $description ="" ;
+			#  print STDERR "PACOBUG: valor = $varsto_paint[0] , value = $hash_temporal{$varsto_paint[0]}\n" ;
 			  for (my $i =0 ; $i!=@varsto_paint ; $i ++ ) {
 					$description .= $hash_temporal{$varsto_paint[$i]} ; 
 					if ($i < (@varsto_print ) -1 ) { $description .= $sep ; }
 			  }
-#			  print STDERR "description created = $description\n" ;
-			 debug (1, "vartocheck = $vartocheck value $hash_temporal{$vartocheck} valuetocheck=$value") ;
+			 # print STDERR "description created = $description\n" ;
+		#	 debug (1, "vartocheck = $vartocheck value= $hash_temporal{$vartocheck} valuetocheck=$value") ;
+		#	print STDERR  "PREIFvartocheck = $vartocheck value $hash_temporal{$vartocheck} valuetocheck=$valu\n" ;
                          if ( ($vartocheck eq "all") || (defined ($hash_temporal{$vartocheck}) && ( $hash_temporal{$vartocheck} eq $value )))  {
-			 debug (1,"si que se imprime la info") ;
+#			 debug (1,"si que se imprime la info") ;
 			 if( ($type eq "ul") || ($type eq "ol") ) {
-				 $listing{"$hash_temporal{$varindex}:$direntry"} = "<li><a href=\"$direntry/\">$hash_temporal{$varindex}</a>$description</li>\n" ;
-#				 print STDERR "clave  = $hash_temporal{$varindex}:$direntry \n" ; 	
+				 my $pre ; if ($dir =~ /^\//) { $pre="" ; } else {$pre=$dir ; } ; 
+				 $listing{"$hash_temporal{$varindex}:$direntry"} = "<li><a href=\"$pre\/$direntry/\">$hash_temporal{$varindex}</a>$description</li>\n" ;
+#		#		 print STDERR "clave  = $hash_temporal{$varindex}:$direntry \n" ; 	
 			 }
 			  elsif ($type eq "dl") {
-#				print STDERR "clave  = $hash_temporal{$varindex}:$direntry \n" ;
-				  $listing{"$hash_temporal{$varindex}:$direntry"} = "<dt><a href=\"$direntry/\">$hash_temporal{$varindex}</a></dt>\n<dd>$description</dd>\n" ;
+#		#		print STDERR "clave  = $hash_temporal{$varindex}:$direntry \n" ;
+			 	  my $pre ; if ($dir =~ /^\//) { $pre="" ; } else {$pre=$dir ; } ; 	
+				  $listing{"$hash_temporal{$varindex}:$direntry"} = "<dt><a href=\"$pre\/$direntry/\">$hash_temporal{$varindex}</a></dt>\n<dd>$description</dd>\n" ;
 			}
 	  		   
 			} 
-			else {debug( 1, "Found var $vartocheck set to $value" ) ; }
+		#	else {debug( 1, "Found var $vartocheck set to $value" ) ; }
 			}
-			else { debug (1,  "found directory, $direntry, but not file $$var{'macros.indexdir.file'} inside it" ) ; }
+	#		else { debug (1,  "found directory, $direntry, but not file $$var{'macros.indexdir.file'} inside it" ) ; }
 		}
 	}
 	# Join all all the listing 	
+<<<<<<< .mine
+	foreach my $k  (sort {uc($a) cmp uc($b)} keys %listing ) {
+=======
 	foreach my $k (sort {uc($a) cmp uc($b)} keys %listing ) {
+>>>>>>> .r27
 			$txt .= $listing{$k} ;
 			}
 	
