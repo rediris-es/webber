@@ -6,7 +6,7 @@
 package Menu;
 
 use strict ;
-#no strict "subs";
+no strict "subs";
 
 
 #-------------------------------------------------------------------------
@@ -92,7 +92,7 @@ Foreach menuitem it will produce a:
 <li>< a href="URL"> text </a> </li>
 
 
-$name must be used as (one of) the last processor(s).
+$name must be anywhere in the processor(s)  , list 
 
 $name uses the following Webber variables:
 

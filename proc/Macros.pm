@@ -383,7 +383,7 @@ sub indexdir  {
 			  my $description ="" ;
 			#  print STDERR "PACOBUG: valor = $varsto_paint[0] , value = $hash_temporal{$varsto_paint[0]}\n" ;
 			  for (my $i =0 ; $i!=@varsto_paint ; $i ++ ) {
-					$description .= $hash_temporal{$varsto_paint[$i]} ; 
+					$description .=  $sep  .  $hash_temporal{$varsto_paint[$i]} ;
 					if ($i < (@varsto_print ) -1 ) { $description .= $sep ; }
 			  }
 			 # print STDERR "description created = $description\n" ;
@@ -398,8 +398,8 @@ sub indexdir  {
 			 }
 			  elsif ($type eq "dl") {
 #		#		print STDERR "clave  = $hash_temporal{$varindex}:$direntry \n" ;
-			 	  my $pre ; if ($dir =~ /^\//) { $pre="" ; } else {$pre=$dir ; } ; 	
-				  $listing{"$hash_temporal{$varindex}:$direntry"} = "<dt><a href=\"$pre\/$direntry/\">$hash_temporal{$varindex}</a></dt>\n<dd>$description</dd>\n" ;
+			 	  my $pre ; if ($dir =~ /^\//) { $pre="" ; } else {$pre= $dir  . "/" ; } ; 	
+				  $listing{"$hash_temporal{$varindex}:$direntry"} = "<dt><a href=\"$pre$direntry/\">$hash_temporal{$varindex}</a></dt>\n<dd>$description</dd>\n" ;
 			}
 	  		   
 			} 
@@ -409,11 +409,7 @@ sub indexdir  {
 		}
 	}
 	# Join all all the listing 	
-<<<<<<< .mine
 	foreach my $k  (sort {uc($a) cmp uc($b)} keys %listing ) {
-=======
-	foreach my $k (sort {uc($a) cmp uc($b)} keys %listing ) {
->>>>>>> .r27
 			$txt .= $listing{$k} ;
 			}
 	
