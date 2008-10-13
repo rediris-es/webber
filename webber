@@ -351,6 +351,12 @@ sub process {
 
    &readVars ($page, "source file", \%var) unless (defined $var{'wbbInteractive'} && ( $var{'wbbInteractive'}  eq "1")) ;
 
+   if ((defined $var{'wbbSkip'} ) && ( $var{'wbbSkip'} eq "yes" )) {
+		debug 1, "wbbSkip set, skiping this page" ;
+		pop_var ;
+		exit ;
+		} 
+
    my $target ;
    if ($var{'wbbTargetRoot'} =~ /absolutePath:\s*(.*)/) {
 	$target =$1 ; 
@@ -535,6 +541,12 @@ sub ProcessDir {
          push @pages, $direntry;
       }
    }
+
+   if ((defined $var{'wbbSkip'} ) && ( $var{'wbbSkip'} eq "yes" )) {
+                debug 1, "wbbSkip set, skiping this directorory" ;
+		pop_var ;
+                exit ;
+                }
    foreach my $page (@pages) {  process($page); }
    if ($var{'wbbRecursive'}) {
       foreach my $dir (@dirs) { 

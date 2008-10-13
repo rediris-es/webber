@@ -105,7 +105,8 @@ type: can be ul, ol, dt, (the three type of HTML lists.
 
   This processors parses the wbbdir.cfg files in a group of subdirectories and produces
 the HTML listing , see the documentation 
-
+  
+  #execute: Execute a list webber modules,
 ---
 
 Using the Macros::AddIndex
@@ -466,13 +467,32 @@ sub macro {
                         if ($lin =~ /\\#var/ ) { next ; }
                          $lin =  $1 . $$var{$2} . $3 ; 
                 }
+		elsif ($lin =~ /(.*)#execute\((.*)\)(.*)/) { # Execute a set of webber processors 
+			if ($lin =~ /\\#execute/)  { next ; }
+			$lin = $1 . execute ($2) . $3 ; 
+		}
 		$array[$j] =$lin . "\n"  ;
 	}
 	$$var{$place} = join //, @array  ;	
 
 }
 
-
+sub execute {
+	my $proc=shift ;
+    my $thisp ;
+   if ($proc ne "") {
+       my @tempo = split /\s+/, $pre;
+      foreach $thisp (@tempo) {
+         next unless $thisp =~ /\w+/ ;
+         debug (1," Executing webber Processor  $thisp inside Macros.pm ..." ) ;
+         ($package, $sname) = split /::/,$thisp;
+         require $package .".pm" ;
+         &$thisp( \%var );
+      }
+   }
+   return "" ;
+}
+   
 sub AddIndex {
 
 
