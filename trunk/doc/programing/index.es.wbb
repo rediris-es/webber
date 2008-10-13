@@ -53,4 +53,21 @@ La función como se puede ver en el código recive dos argumentos, el primero el n
 "debug" en el programa webber, permite en función de la variable wbbDebugFile , imprimir los mensajes por STDERR o escribirlos a un
 fichero para ir guardando ahí la depuración.
 
+TIT: Convenciones para el nombre de variables
 
+ Webber ha ido evolucionando a lo largo de más de 10 años y algunas  cosas han ido surgiendo por el camino y lo que antes parecía
+una buena idea se va descartando , después de la primer "webber Conference" en el 2008, pensamos que sería interesante tener una
+definición "homogenea de variables de la siguiente forma:
+<ul>
+<li> Las variables que empiecen por "wbb" son las variables que el programa "webber" entiende y conoce, se intentará que su numero
+sea reducido, para que el "armazon" de webber sea lo más ligero posible</li>
+<li> Las variables de procesadores deberían tener una construccion como nombre_fichero.procesador.valor , por ejemplo la variable
+"sep" (separador) del procesador dirindex incluido en el fichero Macros.pm , se llama a nivel webber "#macros.dirindex.sep" , es
+algo larga, pero esto permite que se pueda saber que variable toca cada procesador </p>
+<li> A ser posible nombres en ingles , y pueden ser largos de forma que se pueda entender que hacen</li>
+<li> Documentar en la documentación y en la ayuda del procesador que variables se emplean y como </li>
+<li> Definir valores "estandard" por defecto que permitan la ejecución del procesador sin tener que asignar muchas variables </li>
+</ul>
+<p>
+Esta denotación "por puntos" sirve por ejemplo para que un procesador "sepa" que variables buscar, por ejemplo el procesador de Menus
+busca 

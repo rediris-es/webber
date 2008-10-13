@@ -53,8 +53,7 @@ which vars to copy.
 <li>  #vars.pathfromoot = "Path from the wbbTargetRoot to the file"
 </ul>
 Note: All this variables requires that file being webbered would  be in a directory
-below #vars.pathvars.wbbsourceroot (defaults to  , to work
-correctly.
+below #vars.pathvars.wbbsourceroot (defaults to  wbbTargetRoot , to work correctly.
 </ul>
 </dd>
 </dl>

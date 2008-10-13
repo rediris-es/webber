@@ -56,6 +56,9 @@ syn match htmlTagName contained "\<\(b\|i\|u\|h[1-6]\|em\|strong\|head\|body\|ti
 
 "Variables webber como keyword
 syn match htmlTagName "#.*="
+syn match htmlTagName "#.*\+"
+syn match htmlTagName "#.*\*"
+
 " new html 4.0 tags
 syn keyword htmlTagName contained abbr acronym bdo button col label
 syn keyword htmlTagName contained colgroup del fieldset iframe ins legend
