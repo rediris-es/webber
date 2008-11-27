@@ -7,7 +7,22 @@ package PgpSign ;
 
 use English ;
 my $name=	"PgpSign";
-my $version=	"0.2";
+my $version=	"0.3";
+
+#-------------------------------------------------------------------------
+# Function: debug 
+#-------------------------------------------------------------------------
+sub debug {
+        my @lines = @_ ;
+        if (defined (&wbbdebug)) { wbbdebug (@lines) ; }
+        elsif (defined main::debug) { main::debug (@lines) ; }
+        else {
+          my $level = shift @lines ;
+        my $line= join '', @lines ;
+        chomp $line ;
+        print STDERR "$line\n" ;
+        }
+}
 
 # defaults
 my $defpgpsign= "/usr/bin/gpg -sat" ;
@@ -59,10 +74,13 @@ sub PgpSign {
    if (exists $$var{'pgpsign.srcvar'}) { $wbbsrc= $$var{'pgpsign.srcvar'} ; }
    if (exists $$var{'pgpsign.dstvar'}) { $wbbdst= $$var{'pgpsign.dstvar'} ; }
 
+    debug 3,  "PgpSign::pgpsign execution" ;
 #
 # cut &paste
 #
 $file= "/tmp/pgpfirma.$$" . $BASETIME ;
+
+unlink $file if -r $file ; 
 
 $i= $INPUT_RECORD_SEPARATOR ;
 undef $INPUT_RECORD_SEPARATOR;
@@ -81,8 +99,10 @@ $mes .= scalar (<PGP>) ;
 $mes .=  "\n (c) 2000 RedIRIS -->\n" ;
 
 close PGP ;
+debug 3, "execution was $pgp < $file" ;
 unlink $file ;
 $$var{$wbbdst} =  $mes ;
+debug 3, "message placed in $wbbdst was\n....\n$mes\....\n" ; 
 
  $INPUT_RECORD_SEPARATOR = $i; 
 }

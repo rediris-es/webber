@@ -351,12 +351,6 @@ sub process {
 
    &readVars ($page, "source file", \%var) unless (defined $var{'wbbInteractive'} && ( $var{'wbbInteractive'}  eq "1")) ;
 
-   if ((defined $var{'wbbSkip'} ) && ( $var{'wbbSkip'} eq "yes" )) {
-		debug 1, "wbbSkip set, skiping this page" ;
-		pop_var ;
-		exit ;
-		} 
-
    my $target ;
    if ($var{'wbbTargetRoot'} =~ /absolutePath:\s*(.*)/) {
 	$target =$1 ; 
@@ -471,11 +465,12 @@ sub process {
       open  FILE  , ">".untaint($var{'wbbTarget'} . $var{'wbbexttmp'} ) || die "Can't write to $target.$var{'wbbexttmp'}\n" ; 
 
     print FILE   $var{'wbbOut'} ;
+    debug (2, "wbbOut written in $var{'wbbTarget'}$var{'wbbexttmp'} " ) ;
    close (FILE);
 # Now the move
    unlink $var{'wbbTarget'}  if -e  $var{'wbbTarget'}   ;
    rename $var{'wbbTarget'}  . $var{'wbbexttmp'} , $var{'wbbTarget'}  ;
-
+   debug (2,"file  $var{'wbbTarget'}$var{'wbbexttmp'}  renamed to  $var{'wbbTarget'} ") ; 
    chmod oct $var{"wbbTargetFileMode"}, untaint ($var{'wbbTarget'} );
 
     # end
@@ -541,12 +536,6 @@ sub ProcessDir {
          push @pages, $direntry;
       }
    }
-
-   if ((defined $var{'wbbSkip'} ) && ( $var{'wbbSkip'} eq "yes" )) {
-                debug 1, "wbbSkip set, skiping this directorory" ;
-		pop_var ;
-                exit ;
-                }
    foreach my $page (@pages) {  process($page); }
    if ($var{'wbbRecursive'}) {
       foreach my $dir (@dirs) { 

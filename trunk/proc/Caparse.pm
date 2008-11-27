@@ -7,9 +7,23 @@
 package Caparse;
 
 my $name="Caparse";
-my $version="1.0";
+my $version="1.69";
 
-use HTML::Parser 3.00 ();
+#use HTML::Parser 3.00 ();
+
+use HTML::Parser ; 
+
+sub debug {
+        my @lines = @_ ;
+        if (defined (&wbbdebug)) { wbbdebug (@lines) ; }
+        elsif (defined main::debug) { main::debug (@lines) ; }
+        else {
+          my $level = shift @lines ;
+        my $line= join '', @lines ;
+        chomp $line ;
+        print STDERR "$line\n" ;
+        }
+}
 
 #
 # Spec pseudo-DTD
@@ -155,6 +169,8 @@ sub caparse {
    %cvv = ();
    @cvt = ();
    local $var = $_[0];
+   debug 3, "Caparse Se ejecuta" ; 
+
    my $spParser = HTML::Parser->new(api_version => 3,
                                     handlers => [
                                        start => [\&spStart,"tagname,attr,text"],

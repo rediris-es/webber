@@ -84,7 +84,11 @@ sub translate
 		my $n= $detect->name ;
 		debug (3,, "Current encoding temporal is $n\n") ;
 #		$$rv{$vartoencode} =  decode ($name, $$rv{$vartoencode}) ;
-		$$rv{$vartoencode} = encode ("utf-8",  $text );
+		my @lines= split /\n/ , $text ;
+		for (my $i=0 ; $i!=@lines ; $i++ ) { 
+			$$rv{$vartoencode} .= encode ("utf-8", $lines[$i] ) ; 
+		}
+		#$$rv{$vartoencode} = encode ("utf-8",  $text );
 	}
 	else { $$rv{$vartoencode} =  $$rv{$vartoencode}  ; }
 	debug (3,"Result is $$rv{$vartoencode}" ) ;
