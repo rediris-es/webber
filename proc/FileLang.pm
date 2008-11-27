@@ -166,6 +166,7 @@ sub filelang {
 	
 		if ($file =~ /$$rv{'language.detectpattern'}/) {
 			$name=$1 ;
+			$$rv{'languaje.name'} =$1 ; 
 			$lang=$2 ;
 			#print STDERR "detectado lenguaje = $lang name=$name, pattern = $$rv{'language.detectpattern'} values $1, $2\n" ;
 		}
@@ -184,8 +185,9 @@ sub filelang {
 		$newname =~ s/%N/$name/ ;
 		$newname =~ s/%L/$lang/ ;
 		$newname =~ s/%E/$$rv{'wbbExtension'}/ ;
-			
+		debug (3, "Changing name from $$rv{'wbbTarget'}" ) ;	
 		$$rv{'wbbTarget'} =  join ("/", @dirs)  . "/" . $newname ;				
+		debug (3,"Changed to $$rv{'wbbTarget'}" ) ;
 		}
 		elsif (($$rv{'language.changename'} eq "noext") ) {
 		my @dirs =  split  /\//, $$rv{'wbbTarget'}  ;
@@ -244,7 +246,7 @@ sub linkfix  {
 			$newname =~ s/\%1/$uno/ ; 
 			$newname =~ s/\%2/$dos/ ;
 			$newname =~ s/\%3/$tres/ ;
-			debug (0,"LINKFIX: Cambiado en $$rv{'wbbSource'} en variable $var valor $filename por $newname") ;
+			debug (1,"LINKFIX: Cambiado en $$rv{'wbbSource'} en variable $var valor $filename por $newname") ;
 		#ESTE	print "LINKFIX: Cambiado en $$rv{'wbbSource'} en variable $var valor $filename por $newname\n" ;
 			$txt=~ s/$filename/$newname/ ;
 			$count++ ;

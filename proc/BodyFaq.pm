@@ -25,13 +25,13 @@ sub debug {
 my $name=	"BodyFaq";
 my $version=	"0.7";
 
-my %defs = (
-	'#bodyfaq.pretoc' => "<h1><center>Indice de Contenidos</center></h1><hr><p><ul>" ,
-	'#bodyfaq.postoc' => "</ul><p>" , 
-	'#bodyfaq.tocsty' => "<li><a href = \"#VALUE\"> VALUE CODE </a></li>" ,
-	'#bodyfaq.entrys' => "<h2><a name = \"VALUE\"> CODE </a></h2><p>" ,
-	'#bodyfaq.sep'    => "TIT" , 
-	'#bodyfaq.place'  => 'wbbOut' , 
+my %def = (
+	'bodyfaq.pretoc' => "<h1><center>Indice de Contenidos</center></h1><hr><p><ul>" ,
+	'bodyfaq.postoc' => "</ul><p>" , 
+	'bodyfaq.tocsty' => "<li><a href = \"#VALUE\"> VALUE CODE </a></li>" ,
+	'bodyfaq.entrys' => "<h2><a name = \"VALUE\"> CODE </a></h2><p>" ,
+	'bodyfaq.sep'    => "TIT" , 
+	'bodyfaq.place'  => 'wbbOut' , 
 ) ;
 my $defpretoc="<h1><center>Indice de Contenidos</center></h1><hr><p><ul>" ;
 my $defpostoc="</ul><p>" ;
@@ -137,7 +137,13 @@ sub bodyfaq
     $entrys=  (defined $$var{'bodyfaq.entrys'}) ?  $$var{'bodyfaq.entrys'} : $def{'bodyfaq.entrys'} ;
     $sep=     (defined $$var{'bodyfaq.sep'})    ?  $$var{'bodyfaq.sep'}    : $def{'bodyfaq.sep'} ;
     $place =  (defined $$var{'bodyfaq.place'})  ?  $$var{'bodyfaq.place'}  : $def{'bodyfaq.place'} ;
- 
+
+	debug (3,"bodyfaq.pretoc= $pretoc" ) ;
+ 	debug (3,"bodyfaq.postoc= $postoc" ) ;
+	debug (3,"bodyfaq.tocsty= $tocsty" ) ;
+	debug (3,"bodyfaq.entrys= $entrys" ) ;
+	debug (3,"bodyfaq.sep= $sep") ;
+	debug (3,"bodyfaq.place=$place") ;
 		
     $level=1 ;
     $label="0" ;
@@ -150,7 +156,7 @@ sub bodyfaq
 #	if ($array[$i] =~ /^TIT/ ) {
 
 		#codigo de la faq
-		debug (5, "DEBUG: Found tag $array[$i] !!") ;
+		debug (3, "DEBUG: Found tag $array[$i] !!") ;
 		$level=$1 ;
 		if ($level eq "") {
 			$level=0 ;
@@ -159,14 +165,14 @@ sub bodyfaq
 		$print = $array[$i] ;
 		$code=$2 ;
 		$label=incr($label,$level) ;
-		debug (5, "DEBUG: change to $label\n") ;
+		debug (3, "DEBUG: change to $label\n") ;
 
 		# OK Let's to compose the toc entry
 		$tentry=$tocsty ;
 		$tentry=~ s/VALUE/$label/g ;
 		$tentry=~ s/CODE/$code/ ;
 		push @toc, $tentry ;
-		debug ( 5,  "DEBUG: pushed $tentry") ;
+		debug ( 3,  "DEBUG: pushed $tentry") ;
 		# and the line
 		$line =$entrys ;
 		$line =~ s/VALUE/$label/g ;
