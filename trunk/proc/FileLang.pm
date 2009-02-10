@@ -15,21 +15,45 @@ no strict "subs" ;
 #-------------------------------------------------------------------------
 sub debug {
         my @lines = @_ ;
-        my $level = shift @lines ;
- 	if (defined (&wbbdebug)) { wbbdebug (@lines) ; }
+        if (defined (&wbbdebug)) { wbbdebug (@lines) ; }
         elsif (defined main::debug) { main::debug (@lines) ; }
         else {
+          my $level = shift @lines ;
         my $line= join '', @lines ;
         chomp $line ;
         print STDERR "$line\n" ;
         }
-        }
+}
 # End Funcion debug
 
 
 
 my $name=	"FileLang";
-my $version=	"1.0";
+my $version=	"1.2";
+
+## No gusta pero lo veo más comodo que cargar uno por defecto y como es largo lo defino aqui, y lo
+# meto despues en el defs.
+my $langnames = <<FIN;
+(       'es' =>  { 
+                'es' => "Español",
+                'en' => "Ingles",
+                'de' => "Aleman",
+                'fr' => "Frances",
+                'gl' => "Gallego",
+                'ca' => "Catalan o Valenciano",
+                'eu' => "Vasco"
+                },
+        'en' =>  {
+                'es' => "Spanish",
+                'en' => "English",
+                'de' => "German",
+                'fr' => "Frech",
+                'gl' => "Galician",
+                'ca' => "Catalan, Valencian" ,
+                'eu' => "Basque"
+                }
+)
+FIN
 
 sub info {
    print "$name v$version: Manipulate some webber vars based on ISO-3166 country code\n" ;
@@ -44,6 +68,10 @@ my %defs = (
 	'filelang.linkfix.detectpattern' => '<a.*href.*=.*["\'](.*\.\w\w\.(?:php|html))["\']' ,
 	'filelang.linksys.namepattern' => '(.*)\.(.*)\.(.*)$' ,
 	'filelang.linkfix.newpattern' => '%1.%3.%2' ,
+	'filelang.otherlang.var' => 'langmenu',
+	'filelang.otherlang.pre' => "<table><tr>\n" , 
+	'filelang.otherlang.post' =>"</tr></table>" ,
+	'filelang.otherlang.template' => '<td><a href="%LINK"> %LANG </a></td>' 
 	) ;
 
 sub help
@@ -116,7 +144,22 @@ of some vars, so for example if you have two vars:
 
 will create #content based in the #wbblangcode var
 
-Useful to use with Webbo to have the same template for pages in different languages
+Useful to use with Webbo to have the same template for pages in different languages,
+if the var "#filelang.langreduction.vars" is defined it will only process the vars
+(space separated lists of vars to reduce, for example:
+#filelang.langreduction.vars= title content 
+
+Will reduce the title-es , title-en, content-fr, etc based on the #wbbLangCode
+
+FileLang::OtherLang : Help processor to produce a "HTML menu list" of links
+to ther language versions of the HTML page, it uses the following vars:
+
+#filelang.otherlang.var: In which webber variable will be the output
+#filelang.otherlang.pre : HTML code before the other Language section
+#filelang.otherlang.post: HTML code after the other language section
+#filelang.otherlang.template: HTML template, the "simbol "%%" will be replaced
+with the code (ISO-CODE) of the file.
+
 
 
 FINAL
@@ -204,15 +247,65 @@ sub filelang {
 
 sub langreduction {
 	my $rv = shift ;
-	
 	if (defined $$rv{'wbbLang'} ) {
+		if ( not defined $$rv{'filelang.langreduction.vars'} ) {
 		foreach my $var (keys %$rv) {
+			 debug (1,"FileLang::langreduction se ejecuta sobre todas las variables" ) ;
 			if ($var =~ /(.+)-$$rv{'wbbLang'}/ ) { $$rv{$1} = $$rv{$var} } ; }
+		}
+		else {
+		debug (1, "FileLang::langreduction se ejecuta sobre $$rv{'filelang.langreduction.vars'}" );
+		foreach my $var (split /\s+/, $$rv{'filelang.langreduction.vars'}) {
+			debug (3, "processing $var looking for $var\-$$rv{'wbbLang'}") ;
+			if  (defined $$rv{"$var\-$$rv{'wbbLang'}"} ) 
+					{ debug (2,"Encontrada variable $var\-$$rv{'wbbLang'} reducida a $var") ;
+					 $$rv{$var} = $$rv{"$var-$$rv{'wbbLang'}"};   }
+			}
+		}
 	}
-
+	else { debug (1,"FileLang::langreduction llamado, pero wbbLang no esta definido!!, do nothing") ;} 
 }
 	
 
+sub otherlang {
+	my $rv = shift ;
+	my $msg ="" ;
+	if (defined $$rv{'wbbLang'} ) {
+		debug (1, "FileLang::otherlang is called , language of the page  is $$rv{'wbbLang'} !!" ) ;
+		my $lang=$$rv{'wbbLang'} ;
+		$$rv{'filelang.otherlang.template'} = $defs{'filelang.otherlang.template'} unless defined ($$rv{'filelang.otherlang.template'}) ;
+		$$rv{'filelang.otherlang.pre'} = $defs{'filelang.otherlang.pre'} unless defined ($$rv{'filelang.otherlang.pre'}) ;
+		$$rv{'filelang.otherlang.post'} = $defs{'filelang.otherlang.post'} unless defined ($$rv{'filelang.otherlang.post'}) ;
+
+		# Por defecto vamos a tener un Langhash, pero por si se proporciona otro
+		my %langhash = (defined ($$rv{'filelang.langhash'} )) ? eval ($$rv{'filelang.langhash'}) : eval $langnames ;
+		my $rlh = $langhash{$lang} ;
+		# No tengo ganas de pensar mucho hoy, esto seguramente se reescribirá pronto, FJMC 
+		# $$rv{'wbbSource'}  contiene el fichero fuente, path incluido y por ahora
+		# la extension finalizadora es wbb
+		$$rv{'wbbSource'} =~ /(.*)\.(..)\.wbb/ ;
+		my $filebase=$1 ;
+		my @tmp = split /\//, $filebase ;
+		my $base = pop @tmp ;
+		foreach my $la (sort keys %$rlh) { 
+			if (-r "$filebase.$la.wbb" ) {  debug (1,"Found lang file $filebase.$la.wbb !!") ;
+							my $cad= $$rv{'filelang.otherlang.template'} ;
+							debug (2, "Languaje template is $cad" ) ;
+							$cad =~ s/%LANG/$$rlh{$la}/ ;
+							$cad =~ s/%CODE/$la/ ;
+							$cad =~ s/%LINK/$base$$rv{'wbbExtension'}.$la/g ;
+							debug (3,"Result is $cad") ; 
+							$msg .= $cad ; 
+							}
+		}
+		$msg = $$rv{'filelang.otherlang.pre'} . $msg . $$rv{'filelang.otherlang.post'} ;
+		$$rv{$$rv{'filelang.otherlang.var'}} = $msg ;
+		debug (3, "Generado otherlang line in variable *$$rv{'filelang.otherlang.var'}* , value:\n<--->$$rv{$$rv{'filelang.otherlang.var'}}<--->\n" ) ;
+		
+			
+	}
+	else { debug( 1, "FileLang::otherlang called , but wbbLang not defined!!") ; }
+}
 
 sub linkfix  { 
 	my $rv= shift ;
