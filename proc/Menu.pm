@@ -125,22 +125,29 @@ sub  menu
 {
 	my $rh= $_[0] ;
 	debug( 1, "Menu:menu se ejecuta\n") ;
-	my $pre = defined ($$rh{'menu.pre'} )  ? $$rh{'menu.pre'} : $defs{'menu.pre'} ;
-	my $post= defined ($$rh{'menu.post'})  ? $$rh{'menu.post'}: $defs{'menu.post'};
-	my $type= defined ($$rh{'menu.type'})  ? $$rh{'menu.type'}: $defs{'menu.type'};
-	my ($template, $templateli, $templatetd) ;
-	if ($type eq "li") {
-	 $templateli = defined ($$rh{'menu.li.template'}) ? $$rh{'menu.li.template'} : $defs{'menu.li.template'} ;
-	}
-	elsif ($type eq "td") {
-	 $templatetd = defined ($$rh{'menu.td.template'}) ? $$rh{'menu.td.template'} : $defs{'menu.td.template'} ;
-	}
 	my $menusrc = defined ($$rh{'menu.src'})  ? $$rh{'menu.src'} :   $defs{'menu.src'} ;
 	debug 2, "Menus a procesar : $menusrc" ; 
 	foreach my $src  (split /\s+/, $menusrc) {
+	debug (2, "Processing menu for $src") ;
+	# Se mezclan las variables.
+     	my $pre = defined ($$rh{'menu.pre'} )  ? $$rh{'menu.pre'} : $defs{'menu.pre'} ;
+        my $post= defined ($$rh{'menu.post'})  ? $$rh{'menu.post'}: $defs{'menu.post'};
+#        my $type= defined ($$rh{'menu.type'})  ? $$rh{'menu.type'}: $defs{'menu.type'};
+        my ($template, $templateli, $templatetd) ;
+#        if ($type eq "li") {
+         $templateli = defined ($$rh{'menu.li.template'}) ? $$rh{'menu.li.template'} : $defs{'menu.li.template'} ;
+ #       }
+#        elsif ($type eq "td") {
+         $templatetd = defined ($$rh{'menu.td.template'}) ? $$rh{'menu.td.template'} : $defs{'menu.td.template'} ;
+#        }
+	debug (3, "Default template for  li= $templateli, default template for td = $templatetd") ;
 	my ($var , $target ) = split /:/ , $src ;
 	debug (2, "Variable origen =$var se escribira el menu en $target") ;
-	debug(2, "variables que afectan a este menu : menu.$var.pre menu.$var.post menu.$var.type") ;
+	debug(2, "variables que afectan a este menu : menu.$var.pre menu.$var.post menu.$var.type valores:") ;
+	debug(2, "menu.$var.pre = $$rh{\"menu.$var.pre\"}");
+	debug(2, "menu.$var.post= $$rh{\"menu.$var.post\"}");
+	debug(2, "menu.$var.type= $$rh{\"menu.$var.type\"}");
+ 
 	$pre = defined ($$rh{"menu.$var.pre"} ) ? $$rh{"menu.$var.pre"}  : $pre ;
 	$post= defined ($$rh{"menu.$var.post"}) ? $$rh{"menu.$var.post"} : $post ;
 	
@@ -150,6 +157,9 @@ sub  menu
 		}
 
 	else {
+		debug(3, "XX= menu.$var.type = $$rh{\"menu.$var.type\"}" ) ;
+		debug(3, "default template procesador Menu is $defs{'menu.td.template'}") ;
+		debug(3, "templated set to $$rh{'menu.td.template'}") ;
 		 $template= defined ($$rh{"menu.$var.template"}) ? $$rh{"menu.$var.template"} : $templatetd ;
 		debug (2,"setting output template to td style = $template");
 		 }
