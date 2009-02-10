@@ -155,5 +155,13 @@ evolucion de Dir.pm e incorpora determinadas "macros" que se pueden emplear a la
 en <ahref="programing/"> la seccion de programacion de procesadores</a> hay mas informacion sobre como escribir nuevos procesadores.
 
 
+TIT: Uso normal de webber.
 
+ Webber esta pensado para eliminar la necesidad de escribir páginas HTML  de escribir de forma repetida información "redundande" en páginas
+HTML como puede ser el estilo de una página como puede ser donde empieza el texto de la página, donde se pone el logo de la página, o información que no cambia mucho como pueden ser el contenido de los menús .
+<p>
+Mediante el sistem de "herencia" de webber, los contenidos "fijos" solamente cuando hacen falta, de forma que el resto de informaición puede ser compartida por las distintas páginas sin tener que volver a escribirla o copiarla de una plantilla
 
+TIT: Empezando desde cero.
+
+ En <a href="de_cero_a_webber">de cero a webber</a> hay un ejemplo de como empezar a componer páginas usando webber, 
