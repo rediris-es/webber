@@ -526,15 +526,24 @@ sub ProcessDir {
    my(@pages,@dirs);
    opendir DIR, "."; 
    while (my $direntry = readdir(DIR)) {
+	debug 3, "dir entry $direntry" ;
+#      next if (-l $direntry or -p $direntry or -S $direntry or -b $direntry or
+#               -c $direntry or -t $direntry);
       next if (-l $direntry or -p $direntry or -S $direntry or -b $direntry or
-               -c $direntry or -t $direntry);
+               -c $direntry);
+
+	debug 3, "pasa por aqui" ; 
       if (-d $direntry && $direntry !~ /^\.$/ && $direntry !~ /^\.\.$/) {
          push @dirs, $direntry;
       }
         elsif (-f $direntry && $direntry =~ /$var{wbbFileNameRegExp}/ && 
 	     $direntry ne $var{wbbTemplateName}) {
+		debug ( 3, "pushed $direntry in the proccess queue" ) ;
          push @pages, $direntry;
       }
+
+		else  { debug 3, "not pushed $direntry in the process queue";
+	}
    }
    foreach my $page (@pages) {  process($page); }
    if ($var{'wbbRecursive'}) {

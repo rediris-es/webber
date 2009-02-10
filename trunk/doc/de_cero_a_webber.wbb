@@ -1,0 +1,56 @@
+#title=De cero a Webber
+#wbbIn=
+
+TIT: ¿Como construir y manterner un sitio web con Webber ?
+
+ Para mantener una serie de páginas HTML con webber hacen faltauna serie de requisitos que muchas veces no nos damos cuenta:
+
+<ul>
+<li> Un diseño de como queremos el sitio web, este no es solamente a nivel "estético" (como se van a ver las distintas marcas HTML, sino
+también de que estilos vamos a tener en las páginas HTML.es decir, nos hace falta diseñar una página HTML "tipo" que muestre como queremos 
+que se vea una páginas HTML<p>
+Podemos distinguir dos aspectos en este diseño:
+<dl>
+<dt> El aspecto sintáctico</dt>, <dd>como van a visualizar las marcas HTML, en que posición van a estar los distintos elementos del estilo
+de la página etc, esto afectará a como se ve la información, puede ser cambiado despues con mucha facilidd</dd>
+<dt>El aspecto semantico</dt><dd> ¿Qué elementos va a tener la página HTML ?, ¿Vamos a tener un menú para todo el servidor WWW ?, las distintas
+secciones dentro del servidor, ¿van a tener a su vez otro menú ?, ¿ Las páginas van a estar en uno o varios idiomas ?, etc. Este es el aspecto
+más importante ya que mieentras que los cambios en la "sintaxis" de una sitio WWW, solamente implican "volver a procesar/webbear" las páginas
+mientras que los cambios "semanticos" (incluir un menu de sección, por ejemplo) , pueden requerir que se tengan que editar y modificar las
+información ya escrita.
+</dd>
+</dl>
+</li>
+<li> La información que se quiere mostrar, por lo general se escribe en ficheros con extensión ".wbb", y contienen declaraciones
+ de variable "#variable=valor", como se describe en las páginas del manual.
+<<p>
+Para la creación del diseño de las páginas WWW, existen diversos editores comerciales y opensource, en la sección de herramientas , se incluyen
+algunos de ellos.
+<p>
+El orden idóneo de creación de un sitio web para webber sería:
+<ol>
+<li>Pensamos y definimos los diversos elementos de estilo que van a tener las páginas HTML, por ejemplo podemos pensar que las páginas de nuestro
+servidor van a tener:<p>
+<ol>
+<li> Una texto, en HTML con la información qeu se quiere mostrar en la páginaa .</li>
+<li> Un menú general del servidor WWW, donde donde se muestre las diversas secciones del servidor WWWW</li>
+<li> Unas secciones "fijas", donde se accede al mapa del sitio, información de derechos de autor, licencias, búsquedas en el servidor, etc</li>
+<li> Para cada sección podrá tener un submenu indicando diversas entradas importantes dentro de la sección</li>
+<li> Una serie de elementos decorativos, como logotipo, etc.</li>
+</ul>
+<li>Una vez que sabemos que información vaoms a tener en las páginas el siguiente paso es definir una páginas WWW donde ya indicamos si los
+menús van a estar a la izquierda o la derecha, el espacio de la página que vamos a dedicar al texto, donde ponemos el logotipo, etc. Para esto
+las herramientas de diseño grafico , son imprescindibles.
+</li>
+
+TIT: Herramientas 
+
+ <dl>
+	<dl>a <a href="drawter.com"> Drawter </a> </dl>
+	<dd> Desde esta página WWW es posible "esbozar" el diseño de una página WWW, indicando estilos, fuentes, secciones (div), imagenes etc) que
+	va a tener la página generando después de forma automática el código HTML y hoja de estilo CSS correspondiente, de esta forma se pueden
+	crear plantillas de una forma bastante rápida
+	</dd>
+
+</dl>
+
