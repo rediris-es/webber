@@ -6,6 +6,8 @@
 package Vars;
 
 use File::Basename ;
+
+#################### Auxiliary function & vars   #########################
 #-------------------------------------------------------------------------
 # Function: debug 
 #-------------------------------------------------------------------------
@@ -22,7 +24,14 @@ sub debug {
 }
 # End Funcion debug
 
-
+#-----Programacion modular ;-)--------------
+sub readvars {
+	my $file = shift ;
+	my %hash ;
+ 	main::readVars ( $file , "-" , \%hash) ;
+	return %hash ;
+	}
+#--------------------------------------------
 my %defs = (
 	'vars.pathvars.wbbsourceroot' => 'wbbTargetRoot' 
 	);
@@ -87,6 +96,32 @@ Vars::PathVars
 Note: All this variables requires that file being webbered would  be in a directory
 below #vars.pathvars.wbbsourceroot (defaults to $$defs{'vars.pathvars.wbbsourceroot'} , to work
 correctly.
+
+Vars::readfromfile
+ Read some webbers vars from a webber format file that.
+ webbers vars.
+#vars.readfromfile.CODE.file=
+#vars.readfromfile.CODE.vars=
+
+ where CODE is a generic code to allow multiple file import
+ file is relative to the current (source code path)
+ vars is a list of vars, use the extended syntax of Vars::CopyVars, so 
+#vars.readfromfile.info.file= ./wbbdir.cfg.back
+#vars.readfromfile.info.vars= title author? contributor+
+
+Will:
+  - Set the title vars to the one in the file wbbdir.cfg.bak"
+  - Change the author variable (if not exists) , 
+  - concat the contributors 
+
+Note all the vars are alphanumeric sorted before processing so
+#vars.readfromfile.AAAA.file = ../wbbdir.cfg
+#vars.readfromfile.AAAA.vars = author
+#vars.readfromfile.BBBB.file = ./wbbdir.cfg
+#vars.readfromfile.BBBB.vars = author
+
+Will create the author var with the most specific version if
+found.
 
 FINAL
 }
@@ -161,6 +196,36 @@ sub PathVars {
 	$$rv{'vars.pathtoroot'} = $point ;
 	$$rv{'vars.pathfromroot'} = $relpath ;
 	}
+
+sub readfromfile {
+	my $rv=shift ;
+	debug (1, "Vars::readfrom file is  executed") ;
+	foreach  my $var (sort keys %$rv ) {
+			next unless ($var =~/vars.readfromfile.(.*).file/) ;
+			my $code = $1 ;
+			my $vtemp= "vars.readfromfile.$code.vars" ;
+
+			if (not defined ($$rv{$vtemp})) {
+				debug (1,"found $var , but not $vtemp variable, doing nothing");
+				next ;
+				}
+			my $file= $$rv{$var} ;
+	
+			debug (2, "procesing file $file} from $var , vars to modify $$rv{$vtemp}") ;
+			if (not -r ($file  )) { 
+						debug (1, "file $file  not found, sky!");
+						next ; }
+			my %hash = readvars ($file);
+			my @to_process = split /\s+/, $$rv{$vtemp} ;
+			foreach my $add (@to_process) {
+				debug (4, "vars.readfromfile $code var $add") ;
+				if ($add =~ /(.*)\+$/ ) { $$rv{$1} .= $hash{$1} ; debug (3, "concat(+) $var") ; }
+				elsif ($add=~/(.*)\?$/) { debug (3, "conditional add $1") ;$$rv{$1} = $hash{$1} unless (defined $$rv{$1}) ;  }
+				else { $$rv{$add} =$hash{$add} ; debug (3, "added $add") ; }
+				}
+
+			}
+}	
 
 if ($0 =~ /$name/) { &help; die ("\n"); }
 
