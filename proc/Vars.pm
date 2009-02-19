@@ -123,6 +123,20 @@ Note all the vars are alphanumeric sorted before processing so
 Will create the author var with the most specific version if
 found.
 
+Vars::regex
+Perform Regular expressions actions on webber vars
+
+It will use vars in the format #vars.regex.CODE (where code
+is a unique code that identifies the regular expresion).
+
+Example
+
+#vars.regex.AAAA.var= wbbIn 
+#vars.regex.AAAA.regex= s/XXX/juan/g
+
+Perform a substitituion on on var wbbIn, changing the appareance
+of XXX by the name juan
+
 FINAL
 }
 
@@ -151,13 +165,13 @@ sub CopyVars
    if (defined $$rv{'vars.copyvars'} ) {    
         my @tmp = split /\s+/ , $$rv{'vars.copyvars'} ;
         foreach my $i (@tmp) {
-		if ($i =~ /(.*):+(.*)/ ) { # Concatenation
+		if ($i =~ /(.*):\+(.*)/ ) { # Concatenation
 		   my $src=$1 ;  my  $dst=$2 ;
 		   debug 3, "concatnationcopy :+ from $src to $dst" ;
 		  if (defined $$rv{$dst} ) {$$rv{$dst} .= $$rv{$src} ; }
 		  else {   $$rv{$dst} = $$rv{$src} ; }
 		}
-		elsif ($i =~ /(.*):?(.*)/ ) { #conditional
+		elsif ($i =~ /(.*):\?(.*)/ ) { #conditional
 		 my   $src=$1 ; my $dst=$2 ;
 		       $$rv{$dst} = $$rv{$src}  unless defined ($$rv{$dst});
 			debug 3, "conditional copy :? from $src to $dst" ;
@@ -227,6 +241,29 @@ sub readfromfile {
 			}
 }	
 
+sub regex {
+	my $rv= shift ;
+	debug (1, "Vars::regex is executed") ;
+	foreach my $var (sort keys %$rv) {
+		next unless  ($var =~ /vars.regex.(.*).var/) ;
+		my $code= $1 ;
+		my $regex= "vars.regex.$code.regex" ;
+		if (not defined ($$rv{$regex})) {
+			debug (1, "found vars.regex.$code.var , but no regular expression $regex") ;
+			next ;
+		}
+		my $exec ; 
+		if ($$rv{$regex} =~ /s\/.*\/.*\/.*/ ) {
+			debug (3, "var is $var,  content is $$rv{$var} ");
+			debug (3, "to build is rv{$$rv{$var}} =~ $$rv{$regex}") ;
+			 $exec= "my \$tmp = \"$$rv{$$rv{$var}}\" ; \$tmp =~ $$rv{$regex} ; \$\$rv{$$rv{$var}} = \$tmp ; " ; 
+			 debug (2, "Perl code to eval : $exec ");
+			eval $exec ; 
+			debug (3, "rv{$$rv{$var}} = $$rv{$$rv{$var}}") ;
+		}
+
+}
+}
 if ($0 =~ /$name/) { &help; die ("\n"); }
 
 1;

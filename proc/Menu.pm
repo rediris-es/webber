@@ -104,8 +104,9 @@ The following vars depends on the value of the previus src definition.
 #menu.\$src.pre : HTML code before the menu, (class definition,etc) default= $defs{'menu.pre'}
 #menu.\$src.post: HTML code after the menu, (end of list, etc) defaults = $defs{'menu.post'}
 #menu.\$type: to have different kind of listing by now only "li", (default), 
-#menu.\$template: Default template , by now \n\t $defs{'menu.template'}
-
+#menu.\$src.template:  template , by now \n\t $defs{'menu.template'}
+#menu.\$src.template.current:  Templeate to use in to denote "active" or current, this is used
+if the "key" is the same of  #menu.\$src.active
  Replace \$src with the name of the src part in the menu.src definition
 
 Note: the format of the menu is the following XML:
@@ -151,6 +152,7 @@ sub  menu
 	$pre = defined ($$rh{"menu.$var.pre"} ) ? $$rh{"menu.$var.pre"}  : $pre ;
 	$post= defined ($$rh{"menu.$var.post"}) ? $$rh{"menu.$var.post"} : $post ;
 	
+	my $template_actived="" ;
 	if (defined ($$rh{"menu.$var.type"} ) && $$rh{"menu.$var.type"} eq "li") {
 		$template= defined ($$rh{"menu.$var.template"}) ? $$rh{"menu.$var.template"} : $templateli ; 
 		debug (2, "setting output template to li style = $template") ;
@@ -163,13 +165,20 @@ sub  menu
 		 $template= defined ($$rh{"menu.$var.template"}) ? $$rh{"menu.$var.template"} : $templatetd ;
 		debug (2,"setting output template to td style = $template");
 		 }
-   
+  	  $template_actived= defined ($$rh{"menu.$var.template.current"} ) ? $$rh{"menu.$var.template.current"} : $template ; 
 	debug (2, "Menu  $var contenido $$rh{$var}") ;
    	debug (2, "template= $template , templateli=$templateli templatetd=$templatetd") ;  
 	my @entries = xml2array ( $$rh{$var} ) ;
 	my $output = $pre;
 	foreach my $i (@entries) {
-		my $lin= $template ;
+		my $lin ;
+		#menu.$var.key= indica nombre del valor en las entradas que indica la clave
+		debug (3, "menu.$var.key= " . $$rh{"menu.$var.key"}) ;
+		debug (3, "menu.$var.active = " . $$rh{"menu.$var.active"}) ;
+		if ($$i{$$rh{"menu.$var.key"}} =~ /$$rh{"menu.$var.active"}/ ) {  $lin= $template_actived ;
+				debug (3, "menu.$var.key   =". $$i{$$rh{"menu.$var.key"}}  ."\nmenu.$var.active=". $$rh{"menu.$var.active"});
+				}
+		else {		$lin= $template ; }
 		foreach my $k ( keys %$i)  {
 			debug (3, "replacing $k value $$i{$k} in $lin" );
 			$lin =~ s/\%$k/$$i{$k}/ ;
