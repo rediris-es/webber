@@ -71,7 +71,8 @@ my %defs = (
 	'filelang.otherlang.var' => 'langmenu',
 	'filelang.otherlang.pre' => "<table><tr>\n" , 
 	'filelang.otherlang.post' =>"</tr></table>" ,
-	'filelang.otherlang.template' => '<td><a href="%LINK"> %LANG </a></td>' 
+	'filelang.otherlang.template' => '<td><a href="%LINK"> %LANG </a></td>' ,
+	'filelang.otherlang.template.current' =>'<td><a href="%LINK"> %LANG </a></td>'
 	) ;
 
 sub help
@@ -157,9 +158,10 @@ to ther language versions of the HTML page, it uses the following vars:
 #filelang.otherlang.var: In which webber variable will be the output
 #filelang.otherlang.pre : HTML code before the other Language section
 #filelang.otherlang.post: HTML code after the other language section
-#filelang.otherlang.template: HTML template, the "simbol "%%" will be replaced
+#filelang.otherlang.template: HTML template, the "simbol "%LANG" will be replaced
 with the code (ISO-CODE) of the file.
-
+#filelang.otherlang.template.current: HTML  template it will be used to link to the
+current (wbbLang) language
 
 
 FINAL
@@ -274,6 +276,8 @@ sub otherlang {
 		debug (1, "FileLang::otherlang is called , language of the page  is $$rv{'wbbLang'} !!" ) ;
 		my $lang=$$rv{'wbbLang'} ;
 		$$rv{'filelang.otherlang.template'} = $defs{'filelang.otherlang.template'} unless defined ($$rv{'filelang.otherlang.template'}) ;
+		$$rv{'filelang.otherlang.template.current'} = $defs{'filelang.otherlang.template.current'} unless
+									defined ($$rv{'filelang.otherlang.template.current'}) ;
 		$$rv{'filelang.otherlang.pre'} = $defs{'filelang.otherlang.pre'} unless defined ($$rv{'filelang.otherlang.pre'}) ;
 		$$rv{'filelang.otherlang.post'} = $defs{'filelang.otherlang.post'} unless defined ($$rv{'filelang.otherlang.post'}) ;
 
@@ -289,7 +293,9 @@ sub otherlang {
 		my $base = pop @tmp ;
 		foreach my $la (sort keys %$rlh) { 
 			if (-r "$filebase.$la.wbb" ) {  debug (1,"Found lang file $filebase.$la.wbb !!") ;
-							my $cad= $$rv{'filelang.otherlang.template'} ;
+							my $cad ;
+							if ($la eq $lang) { $cad=$$rv{'filelang.otherlang.template.current'} ; debug (3, "idioma es el current") ; }
+							else {	 $cad= $$rv{'filelang.otherlang.template'} ; }
 							debug (2, "Languaje template is $cad" ) ;
 							$cad =~ s/%LANG/$$rlh{$la}/ ;
 							$cad =~ s/%CODE/$la/ ;
