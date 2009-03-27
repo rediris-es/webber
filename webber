@@ -310,7 +310,8 @@ sub readVars {
             }
          }
          else {
-            chop $line;
+            my $lc = chop $line;
+            $line .=  $lc if ($lc ne '\n');
             $$ref{"$varname"} .= "\n" . EvaluateVar($line , $ref) ;
          }
       }
@@ -527,10 +528,10 @@ sub ProcessDir {
    opendir DIR, "."; 
    while (my $direntry = readdir(DIR)) {
 	debug 3, "dir entry $direntry" ;
-#      next if (-l $direntry or -p $direntry or -S $direntry or -b $direntry or
-#               -c $direntry or -t $direntry);
       next if (-l $direntry or -p $direntry or -S $direntry or -b $direntry or
-               -c $direntry);
+               -c $direntry or -t $direntry);
+#      next if (-l $direntry or -p $direntry or -S $direntry or -b $direntry or
+#               -c $direntry);
 
 	debug 3, "pasa por aqui" ; 
       if (-d $direntry && $direntry !~ /^\.$/ && $direntry !~ /^\.\.$/) {
