@@ -311,7 +311,7 @@ sub readVars {
          }
          else {
             my $lc = chop $line;
-            $line .=  $lc if ($lc ne '\n');
+            $line .=  $lc if (ord($lc) ne 10); # Si no es un \n
             $$ref{"$varname"} .= "\n" . EvaluateVar($line , $ref) ;
          }
       }
