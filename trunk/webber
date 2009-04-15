@@ -89,7 +89,7 @@ $wbbDef{'wbbVersion'} = "$name $version" ;
 
 
 $wbbDef{'wbbRoot'} =   defined $ENV{'WBBROOT'}   ?  $ENV{'WBBROOT'} : getcwd()  ;
-$wbbDef{'wbbConfig'} = defined $ENV{'WBBCONFIG'} ?  $ENV{'WBBCONFIG'} : "webber.cfg"  ;
+$wbbDef{'wbbConfig'} = defined $ENV{'WBBCONFIG'} ?  $ENV{'WBBCONFIG'} :  (-r "/etc/webber/webber.wbb" ? "/etc/webber/webber.wbb" : "webber.wbb" ) ;
 $wbbDef{'wbbConfig'} = defined ($opt{C} ) ?  $opt{C} : $wbbDef{'wbbConfig'} ;
 
 readVars (NormalizePath(  $wbbDef{'wbbConfig'}  ) , 'configuration', \%wbbDef ) ;
