@@ -54,59 +54,57 @@ sub info {
 sub help {
  print <<FINAL;
 
- 	This module includes macros to include files
+This module includes macros to include files
 in the source files, so you don't need to copy the
 information in the wbb source.
  
- The macros included in this release are:
+The macros included in this release are:
 
 if using the Macros::macro processor.
   
-  * #dir( ), 	This is an automatic directory include 
- macro  "#dir(realpath,webserverpath,regex)"  would be 
- expanded with a list of files that matched the regex
-(regex in perl code)
+* #dir( ), 	This is an automatic directory include 
+  macro  "#dir(realpath,webserverpath,regex)"  would be 
+  expanded with a list of files that matched the regex
+  (regex in perl code)
 
-It will use the use "fileindex.txt" in the realpath directory
-to obtain a description of each file, the format of this file 
-is filename: description.
+  It will use the use "fileindex.txt" in the realpath directory
+  to obtain a description of each file, the format of this file 
+  is filename: description.
 
- This processor modifies by defaults wbbin, but this can be
-change using the variable "dir.place and setting this to wbbout
+  This processor modifies by defaults wbbin, but this can be
+  change using the variable "dir.place and setting this to wbbout
 
-  *   #includefile ( ) include a txt file in the , three arguments,
- #includefile(file,search,replace), file is the file to include,
- search and replace are regex to be used, to replace text in
- the file. file is HTMLEncoded. (by default) to avoid problems
- with HTML TAGS.
+* #includefile ( ) include a txt file in the , three arguments,
+  #includefile(file,search,replace), file is the file to include,
+  search and replace are regex to be used, to replace text in
+  the file. file is HTMLEncoded. (by default) to avoid problems
+  with HTML TAGS.
 
- *  #includecode() , like includefile, but the file is included without
-any chnage (usuful for including HTML or other language code.
+* #includecode() , like includefile, but the file is included without
+  any chnage (usuful for including HTML or other language code.
 
-
-    #listfrom file() , include a txt file, similar to #includefile,
- but include the information in a file.
+* #listfrom file() , include a txt file, similar to #includefile,
+  but include the information in a file.
  
-	
-    #tablefromcsv(), create a table (type 2,http://www.rediris.es/app/webber/guia/), 
-    receive up to four arguments, CSV file, fields to print (numeric,
-   separated by ":" , and a search / replace expression
+* #tablefromcsv(), create a table (type 2,http://www.rediris.es/app/webber/guia/), 
+  receive up to four arguments, CSV file, fields to print (numeric,
+  separated by ":" , and a search / replace expression
 
-   #printindex(indexfile), print an index based on the information 
+* #printindex(indexfile), print an index based on the information 
 
-   #servar (Var, value), set the value of var variable to a new value
+* #servar (Var, value), set the value of var variable to a new value
  
-  #var(var) ,put in the putput the value of var.
+* #var(var) ,put in the putput the value of var.
 
- #indexdir(type,webber_vars) produces an HTML listing (directory, based
-in subdirectories and the contents of some webber vars, it requires two arguments
-type: can be ul, ol, dt, (the three type of HTML lists.
-    webber_var is a list of webber vars to put.
+* #indexdir(type,webber_vars) produces an HTML listing (directory, based
+  in subdirectories and the contents of some webber vars, it requires two arguments
+  type: can be ul, ol, dt, (the three type of HTML lists.
+  webber_var is a list of webber vars to put.
 
   This processors parses the wbbdir.cfg files in a group of subdirectories and produces
-the HTML listing , see the documentation 
+  the HTML listing , see the documentation 
   
-  #execute: Execute a list webber modules,
+* #execute: Execute a list webber modules,
 ---
 
 Using the Macros::AddIndex
@@ -459,7 +457,7 @@ sub macro {
 		elsif ($lin =~ /(.*)#indexdir\((.*),(.*)\)(.*)/ ) {
                         if ($lin =~ /\\#indexdir/ ) {  print "STDERR es un comentario \n" ;$lin =~ s/\\#indexdir/#indexdir/ ; next ;}
                 $lin = $1 . indexdir ($2,$3,$var) . $4 ; }
-		elsif ($lin =~ /(.*)#setvar\((.*),(.*)\)(.*)/ ) { # Sevar solamente fija una variable
+		elsif ($lin =~ /(.*)#setvar\((.*),(.*)\)(.*)/ ) { # setvar solamente fija una variable
 			if ($lin =~ /\\#setvar/ ) { next ; }
 			$$var{$2} = $3  ;   $lin =  $1 . $4 ; 
 		}	

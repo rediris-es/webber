@@ -253,12 +253,25 @@ sub regex {
 			next ;
 		}
 		my $exec ; 
-		if ($$rv{$regex} =~ /s\/.*\/.*\/.*/ ) {
-			debug (3, "var is $var,  content is $$rv{$var} ");
-			debug (3, "to build is rv{$$rv{$var}} =~ $$rv{$regex}") ;
-			 $exec= "my \$tmp = \"$$rv{$$rv{$var}}\" ; \$tmp =~ $$rv{$regex} ; \$\$rv{$$rv{$var}} = \$tmp ; " ; 
-			 debug (2, "Perl code to eval : $exec ");
-			eval $exec ; 
+		if ($$rv{$regex} =~ /s\/(.*)\/(.*)\/(.*)/ ) {
+			debug (3, "Var::regex var is $var,  content is $$rv{$var} ");
+			debug (3, "Var::regex1 to build is rv{$$rv{$var}} =~ $$rv{$regex}") ;
+			my $page = $$rv{$$rv{$var}} ;
+			my $regex2= $$rv{$regex} ;
+			debug (3, "Var::regex2 to build is rv{$$rv{$var}} =~ $regex2") ;
+#			 $regex2 = 's/https:\\/\\/alejandria.rediris.es\/.*\/(.*)"/$1"/mg' ;
+			debug (3, "Var::regex3 to build is rv{$$rv{$var}} =~ $regex2") ;
+			chomp $regex2 ;
+			chomp $page ;
+		 	debug (3 , "Var::regex to execute is \$page =~ $regex2 ") ;
+			debug (3, "page vale $page") ;
+			my $exec = "\$page =~ $regex2" ;
+			debug (3, "Var::regex exec is $exec" ) ;
+			my $res= eval ($exec) ;
+#			eval {				$page =~ $regex ;	} ;
+#			debug (3, "resultado evaluacion $@") ;
+			debug (3, "Var::regex result is $page") ;
+			$$rv{$$rv{$var}} = $page ; 
 			debug (3, "rv{$$rv{$var}} = $$rv{$$rv{$var}}") ;
 		}
 
