@@ -190,7 +190,8 @@ sub PathVars {
 	debug 1, "Vars::PathVars Vars is started\n" ;
 	if (defined ($$rv{'wbbInteractive'} && $$rv{'wbbInteractive'} eq "1")) {
 		debug  1, "Intectavtive mode not doing anything"; 
-		exit  ; }
+		 }
+	else {
 	my $basevar= defined ($$rv{'vars.pathvars.wbbsourceroot'} ) ? $$rv{'vars.pathvars.wbbsourceroot'} : $defs{'vars.pathvars.wbbsourceroot'} ;
 	my $base = $$rv{$basevar} ;
 	debug 2, "checking paths, basevar =$basevar value base  Source start at =$base wbbTarget=$$rv{'wbbTarget'}" ;
@@ -210,7 +211,7 @@ sub PathVars {
 	$$rv{'vars.pathtoroot'} = $point ;
 	$$rv{'vars.pathfromroot'} = $relpath ;
 	}
-
+}
 sub readfromfile {
 	my $rv=shift ;
 	debug (1, "Vars::readfrom file is  executed") ;
