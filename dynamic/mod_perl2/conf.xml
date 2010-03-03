@@ -1,0 +1,25 @@
+<site "irc.abuses.es">
+	<env>
+	    <key "WBBROOT">/repositorio/servicios/web/webber/</key>
+	    <key "REPOSITORIO">/repositorio/servicios/web/webber/</key>
+	</env>
+	<config>/repositorio/servicios/web/webber/webber.wbb</config>
+	<local>
+	    <key "wbbInteractive">1</key>
+	    <key "subtitle"></key>
+	    <key "title">Titulo de la pagina</key>
+	</local>
+</site>
+<site "irc.abuses.es/abuses">
+        <env>
+            <key "WBBROOT">/repositorio/servicios/web/webber/</key>
+            <key "REPOSITORIO">/repositorio/servicios/web/webber/</key>
+        </env>
+        <config>/repositorio/servicios/web/webber/abuses.wbb</config>
+        <local> 
+            <key "wbbInteractive">1</key>
+            <key "subtitle">Aqui viene con subtitulo que en el otro no tiene</key>
+            <key "title">Titulo de la pagina</key>
+	    <key "wxbbProc">FileLang::filelang FileLang::langreduction FileLang::otherlang Macros::macro  Vars::CopyVars  FileLang::linkfix  BodyFaq::bodyfaq  Menu::menu CopyFiles::copyfiles Webbo::webbo</key> 
+        </local>
+</site>
