@@ -22,13 +22,21 @@ install: ; \
 	mkdir -p $(BIN)
 	${IC}   webber  ${BIN}
 	mkdir -p $(LIB)/webber/proc
-	${IC} -d proc/ ${LIB}/webber/proc
+	${IC} -p proc/* ${LIB}/webber/proc
 	mkdir -p $(DOC)/webber/
-	$(IC)  -d doc  $(DOC)/webber
+#	$(IC)  -d doc/*  $(DOC)/webber
 	$(IC) readme $(DOC)/webber
 	$(IC) leeme $(DOC)/webber
-	$(IC install $(DOC)/webber
 	mkdir -p $(ETC)/webber/
 	${IC}  webber.wbb ${ETC}/webber/
 	mkdir -p $(VAR)/log/webber
-	
+
+install_apache: ; \
+	mkdir -p $(ETC)/httpd/conf.d/
+	mkdir -p $(ROOT)/usr/lib/perl5/5.8.8/Webber
+	$(IC) dynamic/mod_perl2/webber.conf $(ETC)/httpd/conf.d/
+	$(IC) dynamic/mod_perl2/readme.txt $(DOC)/webber/
+	$(IC) dynamic/mod_perl2/apache-config.xml $(ETC)/webber/
+	$(IC) dynamic/mod_perl2/Webber/*  $(ROOT)/usr/lib/perl5/5.8.8/Webber/
+	$(IC) dynamic/mod_perl2/startup.pl $(ROOT)/usr/lib/perl5/5.8.8/Webber/
+

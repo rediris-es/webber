@@ -1,0 +1,33 @@
+
+
+ To install webber:
+
+
+ make root= /path/to/root
+
+will install
+
+	main config file in /path/to/root/etc/webber/webber.wbb
+	webber (program) in /path/to/root/usr/bin/webber
+        webber (procs)  in /path/to/root/usr/lib/webber/procs
+	doc  	in /path/to/root/share/doc/webber
+
+
+Defaults to:
+	root=/
+	
+so 
+	config	(etc) is /etc/webber.wbb
+	webber (program) /usr/bin/webber
+	webber (procs)	 /usr/lib/webber/procs
+	doc 		/usr/share/doc/webber
+
+
+you need to define the WBBROOT environment variable if you install
+webber to a different path
+
+
+setup
+
+ After the installation, edit the webber.wbb file to configure your environment
+

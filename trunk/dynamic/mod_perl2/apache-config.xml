@@ -1,0 +1,12 @@
+<site "/webber">
+	<env>
+	    <key "WBBROOT">""</key>
+	    <key "REPOSITORIO">""</key>
+	</env>
+	<config>/etc/webber/webber.wbb</config>
+	<local>
+	    <key "wbbInteractive">1</key>
+	    <key "subtitle"></key>
+	    <key "title">Titulo de la pagina</key>
+	</local>
+</site>
