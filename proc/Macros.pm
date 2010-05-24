@@ -1,4 +1,4 @@
-#!/opt/local/bin/perl
+#!/usr/bin/perl
 #
 #
 # $Id: Macros.pm,v 1.4.2.1 2008/07/31 15:01:43 paco Exp $
