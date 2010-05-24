@@ -57,7 +57,7 @@ FINAL
 
 sub mediawiki
 {
-  use XHTML::MediaWiki;
+#  use XHTML::MediaWiki;
   my $mediawiki = XHTML::MediaWiki->new();
 
    debug( 1, "(MediaWiki) MediaWiki  se ejecuta\n") ;
