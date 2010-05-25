@@ -189,9 +189,8 @@ sub filelang {
 		# Interactive mode not doing so much
 		 $$rv{"wbbDateMeta"} = POSIX::strftime ("%Y-%m-%d", localtime);
    		 $$rv{"wbbDateWeb"}  = POSIX::strftime ("%d/%m/%Y", localtime);
-		 $$rv{'wbbLangname'} = code2language ($$rv{'language.default'} ) ;
-		 $$rv{'wbbLang'} = $$rv{'language.default'} ;
-
+		 $$rv{'wbbLang'} =  defined ($$rv{'wbbLang'}) ? $$rv{'wbbLang'} : $$rv{'language.default'} ;
+		 $$rv{'wbbLangname'} = code2language ($$rv{'wbbLang'} ) ; 
 		}
 
 	else   {  #We have a filename
