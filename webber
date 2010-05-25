@@ -98,12 +98,12 @@ $wbbDef{'wbbRecursive'}   = ($opt{r} ) ? 1 : $wbbDef{'wbbRecursive'} ;
 $wbbDef{'wbbForceupdate'} = ($opt{f}) ?  1 : $wbbDef{'wbbForceUpdate'}  ;
 $wbbDef{'wbbMakedir'}     = ($opt{m})  ?  0 :$wbbDef{'wbbMakedir'} ;
 
-$wbbDef{'wbbDebug'}  = defined $ENV{'WBBDEBUG'}   ?  $ENV{'WBBDEBUG'} : 10   ;
+$wbbDef{'wbbDebug'}  = defined $ENV{'WBBDEBUG'}   ?  $ENV{'WBBDEBUG'} :  defined $wbbDef{'wbbDebug'} ? $wbbDef{'wbbDebug'} : 10   ;
 
-$wbbDef{'wbbexttmp'} = defined $ENV{'WBBEXTTMP'} ?  $ENV{'WBBEXTTMP'} : '.tmp' ;
+$wbbDef{'wbbexttmp'} = defined $ENV{'WBBEXTTMP'} ?  $ENV{'WBBEXTTMP'} : defined $wbbDef{'wbbexttmp'} ? $wbbDef{'wbbexttmp'} : '.tmp' ;
 
-$wbbDef{'wbbTargetRoot'} = defined $ENV{'WBBTARGETROOT'} ? $ENV{'WBBTARGETROOT'} : "$wbbDef{'wbbRoot'}" . "/src"  ;
-$wbbDef{'wbbSourceRoot'} = defined $ENV{'WBBSOURCEROOT'} ? $ENV{'WBBSOURCEROOT'} : "$wbbDef{'wbbRoot'}" . "/html" ;
+$wbbDef{'wbbTargetRoot'} = defined $ENV{'WBBTARGETROOT'} ? $ENV{'WBBTARGETROOT'} : defined $wbbDef{'wbbTargetRoot'} ? $wbbDef{'wbbTargetRoot'} : "$wbbDef{'wbbRoot'}" . "/src"  ;
+$wbbDef{'wbbSourceRoot'} = defined $ENV{'WBBSOURCEROOT'} ? $ENV{'WBBSOURCEROOT'} : defined $wbbDef{'wbbSourceRoot'} ? $wbbDef{'wbbSourceRoot'} : "$wbbDef{'wbbRoot'}" . "/html" ;
 
 
 
