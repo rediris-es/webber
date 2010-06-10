@@ -186,12 +186,12 @@ sub untaint {
 sub EvaluateVar  {
         my $lin = $_[0] ;
         my $ref = $_[1] ;
-        my $c ;
+        my $c=""  ;
 	my %var ;
 	debug (3, "Entrada en EvaluateVar con Line= $lin" ) ;
 
         while ($lin =~ /.*\$var\(([\w]+[a-zA-Z0-9_.\-]*)\).*/ ) {
-                $c = $$ref{$1} ;
+                $c = $$ref{$1} if (defined ($$ref{$1})) ;
                 $lin =~ s/\$var\($1\)/$c/ ;
         }
         while ($lin =~ /.*\$env\(([\w]+[a-zA-Z0-9_.\-]*)\).*/ ) {

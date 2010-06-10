@@ -206,11 +206,11 @@ sub do_work
 sub copyfiles  {
  my $lin="" ;
  $var = $_[0] ;
- print STDERR "procesing $$var{'wbbSource'}\n"  ;
  if ($$var{'wbbInteractive'} eq "1") {
 	debug (2, "Modo CGI no s hace nada") ;
 	}
 else {
+ print STDERR "procesing $$var{'wbbSource'}\n"  ;º
  $wbbDebug = $$var{'wbbDebug'} ;
  $wbbSourceRoot= $$var{'wbbSourceRoot'} ;
  $wbbTargetRoot= $$var{'wbbTargetRoot'} ;
