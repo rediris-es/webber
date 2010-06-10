@@ -207,7 +207,7 @@ sub copyfiles  {
  my $lin="" ;
  $var = $_[0] ;
  if ($$var{'wbbInteractive'} eq "1") {
-	debug (2, "Modo CGI no s hace nada") ;
+	debug (2, " CGI mode don't do anything") ;
 	}
 else {
  print STDERR "procesing $$var{'wbbSource'}\n"  ;º
