@@ -37,8 +37,8 @@ echo "Currently there is no build, it's only Perl code"
 %install 
 
 cd trunk 
-ROOT=$RPM_BUILD_ROOT make install
-ROOT=$RPM_BUILD_ROOT make install_apache 
+ROOT=$RPM_BUILD_ROOT make install_webber
+ROOT=$RPM_BUILD_ROOT make install_apache
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -80,6 +80,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/doc/webber/readme-modperl2.txt
 /var/www/html/webber/hello.php
 /var/www/html/webber/hello.wbb
+ /etc/logrotate.d/webber.logrotate
 
 %changelog
 
