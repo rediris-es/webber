@@ -29,7 +29,7 @@ our @EXPORT_OK =  qw(read_webber_conf debug );
 
 no strict 'refs';
 
-my $debugfile="/tmp/debug-webber.txt" ;
+my $debugfile="/var/log/webber/debug-web.txt" ;
 my %webber_env= () ;
 my %webber_default =() ;
 
@@ -186,13 +186,16 @@ sub untaint {
 sub EvaluateVar  {
         my $lin = $_[0] ;
         my $ref = $_[1] ;
-        my $c=""  ;
+        my $c ;
 	my %var ;
 	debug (3, "Entrada en EvaluateVar con Line= $lin" ) ;
 
         while ($lin =~ /.*\$var\(([\w]+[a-zA-Z0-9_.\-]*)\).*/ ) {
-                $c = $$ref{$1} if (defined ($$ref{$1})) ;
+                if (defined ($$ref{$1})) {
+			$c = $$ref{$1}  ;
+		} else { $c= "" ; }
                 $lin =~ s/\$var\($1\)/$c/ ;
+		
         }
         while ($lin =~ /.*\$env\(([\w]+[a-zA-Z0-9_.\-]*)\).*/ ) {
                 $c = $webber_env{$1} ;
@@ -222,9 +225,8 @@ sub init_webber_system {
 	%webber_default = () ;
 	read_webber_file ($file, \%webber_default) ;
 	# We set some defaults values here
-	$webber_default{'wbbInteractive'} = "1" ;
-	$webber_default{'subtitle'} = "" ;
-	$webber_default{'title'} = "Titulo de la pagina" ;
+	if (defined $webber_default{'wbbDebugFile'} ) {set_debug_file ($webber_default{'wbbDebugFile'} ); }
+
 }
 
 
@@ -416,13 +418,14 @@ sub handler {
 #	print  STDERR "Peticion de $host$uri\n" ;
 	# Precargamos el hash con la infomracion 	
 	lookup_web ($host .  $uri);
+	if (defined $webberhash{'wbbDebugFile'} ) {set_debug_file ($webberhash{'wbbDebugFile'} ); }
 	#cargamos la pagina en formato webber
         string2webber($string, \%webberhash) ;	
 	do_webber(\%webberhash) ;
 
 	my @out = split /\n/, $webberhash{'wbbOut'} ; 
 	for (my $i=0 ; $i!=@out ; $i++) {
-			  $f->print($out[$i]) ;  }
+			  $f->print("$out[$i]\n") ;  }
 
 	  
       return Apache2::Const::OK; 
