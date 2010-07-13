@@ -64,7 +64,7 @@ sub debug {
 
                 open FILE, ">>$file" ;
          #       print FILE  untaint ($line) . "\n" ;
-		 print FILE  ($line) . "\n" ;
+#		if(tell(FILE) != -1) { print FILE  ($line) . "\n" ; }
 
                 close FILE ;
         }
