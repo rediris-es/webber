@@ -426,8 +426,8 @@ sub handler {
 	my @out = split /\n/, $webberhash{'wbbOut'} ; 
 	for (my $i=0 ; $i!=@out ; $i++) {
 			  $f->print("$out[$i]\n") ;  }
-
-	  
+	# importante "flush" de los datos !!
+      $f->seen_eos(1); 
       return Apache2::Const::OK; 
   } 
 
