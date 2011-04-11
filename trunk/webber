@@ -59,7 +59,7 @@ my (%opt) ;
 
 
 my $name="Webber";
-my $version="1.20";
+my $version="1.20.1";
 my $copyright="Copyright 1996-2008, RedIRIS";
 
 
@@ -99,6 +99,7 @@ $wbbDef{'wbbForceupdate'} = ($opt{f}) ?  1 : $wbbDef{'wbbForceUpdate'}  ;
 $wbbDef{'wbbMakedir'}     = ($opt{m})  ?  0 :$wbbDef{'wbbMakedir'} ;
 
 $wbbDef{'wbbDebug'}  = defined $ENV{'WBBDEBUG'}   ?  $ENV{'WBBDEBUG'} :  defined $wbbDef{'wbbDebug'} ? $wbbDef{'wbbDebug'} : 10   ;
+$wbbDef{'wbbDebugFile'} = defined $ENV{'WBBDEBUGFILE'} ? $ENV{'WBBDEBUGFILE'} : defined $wbbDef{'wbbDebugFile'} ? $wbbDef{'wbbDebugFile'} : '' ;
 
 $wbbDef{'wbbexttmp'} = defined $ENV{'WBBEXTTMP'} ?  $ENV{'WBBEXTTMP'} : defined $wbbDef{'wbbexttmp'} ? $wbbDef{'wbbexttmp'} : '.tmp' ;
 
