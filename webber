@@ -322,6 +322,34 @@ sub readVars {
 }
 
 #----------------------------------------------------------------------
+# Function: runprocs
+# Execute the processors listed in a webber Var, call recursive if 
+# a "non proc" if found
+#----------------------------------------------------------------------
+sub runprocs {
+	my $proclist=$_[0] ;
+
+   my $thisp ;
+   if ($var{$proclist} ne "") {
+   my @tempo = split /\s+/, $var{$proclist};
+      foreach $thisp (@tempo) {
+         next unless $thisp =~ /\w+/ ;
+	 if ($thisp =~  /.*::.*/ ) { 
+         	debug (1," [$proclist] Using processor  $thisp ..." ) ;
+         	my ($package, $sname) = split /::/,$thisp;
+         	require $package .".pm" ;
+         	&$thisp( \%var );
+         	debug (1, "\n" ) ;
+	}
+	else {
+		debug (1,"[$proclist] Found another Var , $thisp ..") ;
+		runprocs ($thisp) ;
+		debug (1, "\n" ) ;
+      }
+   }
+}
+}
+#----------------------------------------------------------------------
 # Function: process
 #----------------------------------------------------------------------
 sub process {
@@ -351,7 +379,7 @@ sub process {
    ((-f "$page") ||  (defined $var{'wbbInteractive'} && ( $var{'wbbInteractive'}  eq "1") )) || die "No such page $page.\n";
    my (@stats) = stat _;
 
-   &readVars ($page, "source file", \%var) unless (defined $var{'wbbInteractive'} && ( $var{'wbbInteractive'}  eq "1")) ;
+  ## Y esto es lo que se quita (ahora sería File::ReadVars &readVars ($page, "source file", \%var) unless (defined $var{'wbbInteractive'} && ( $var{'wbbInteractive'}  eq "1")) ;
 
    my $target ;
    if ($var{'wbbTargetRoot'} =~ /absolutePath:\s*(.*)/) {
@@ -412,68 +440,11 @@ sub process {
 	
    unshift @INC, (getcwd(), split /\s/, $var{'wbbProcs'});
 
-   my $pre =  $var{'wbbPre'};
-   my $proc = $var{'wbbProc'};
-   my $post = $var{'wbbPost'};
-   debug (1, "Pre-processor(s): $pre\n" ) ; 
-   debug (1, "Processor(s): $proc\n" ) ;
-   debug (1, "Post-processor(s): $post\n" ) ;
+## Nota: Esto es todo lo de antes, se supone que teniendo 
+## Wbbrun = File::ReadVars wbbPre wbbProc wbbPost File::WriteVars se debería 
+## tener lo mismo que ahora.
 
-   my $thisp ;	
-   if ($pre ne "") {
-      @tempo = split /\s+/, $pre;
-      foreach $thisp (@tempo) {
-	 next unless $thisp =~ /\w+/ ;
-	 debug (1," Using pre-processor $thisp ..." ) ;
-         ($package, $sname) = split /::/,$thisp;
-         require $package .".pm" ;
-         &$thisp( \%var );
-	 debug (1, "\n" ) ;
-      }
-   }
-
-   if ($proc ne "") {
-      @tempo = split /\s+/, $proc;
-      foreach $thisp (@tempo) {
-	 next unless $thisp =~ /\w+/ ;
-         debug (1,"Using processor $thisp ...");
-         ($package, $sname) = split /::/,$thisp;
-         require $package.".pm";
-         &$thisp(\%var );
-         debug (1,"\n") ;
-      }
-   }
-   else  { $var{'wbbOut'} .= $var{'wbbIn'}; }
-
-   debug(1, "Fase de Postproceso\n") ;	
-   if ($post ne "") {
-	debug 1, "post es $post" ;
-      @tempo = split /\s+/, $post;
-      foreach $thisp (@tempo) {
-  	 next unless $thisp=~ /\w+/ ;
-         debug (1,"Using post-proccesor $thisp ..." ); 
-         ($package, $sname) = split /::/,$thisp;
-         require $package.".pm";
-         &$thisp( \%var );
-         debug (1, "\n");
-      }
-   }
-
-# OutPut to STDOUT
-
-# This is where the real magic is done
-#
-
-      open  FILE  , ">".untaint($var{'wbbTarget'} . $var{'wbbexttmp'} ) || die "Can't write to $target.$var{'wbbexttmp'}\n" ; 
-
-    print FILE   $var{'wbbOut'} ;
-    debug (2, "wbbOut written in $var{'wbbTarget'}$var{'wbbexttmp'} " ) ;
-   close (FILE);
-# Now the move
-   unlink $var{'wbbTarget'}  if -e  $var{'wbbTarget'}   ;
-   rename $var{'wbbTarget'}  . $var{'wbbexttmp'} , $var{'wbbTarget'}  ;
-   debug (2,"file  $var{'wbbTarget'}$var{'wbbexttmp'}  renamed to  $var{'wbbTarget'} ") ; 
-   chmod oct $var{"wbbTargetFileMode"}, untaint ($var{'wbbTarget'} );
+ runprocs ("wbbRun") ;
 
     # end
     pop_var ;
