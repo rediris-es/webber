@@ -1,0 +1,8 @@
+/var/log/webber/debug-web.txt {
+    daily
+    compress
+    rotate 7
+    missingok
+    notifempty
+    sharedscripts
+}

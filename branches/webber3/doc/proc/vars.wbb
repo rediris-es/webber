@@ -1,0 +1,60 @@
+#title=vars
+#wbbIn=
+<p>
+This module implements different proccessor to manipulate Webber Vars.
+the Vars that are affected by this proccesor usually are defined
+in a webber vars.
+<p> 
+Vars processors  must be used as (one of) the first processor(s).
+<p>
+Vars  implement the following proccesors:
+<dl>
+<dt>Vars::LazyEval</dt>
+<dd>
+ Evaluates/Substitutes the occurrences in webber Vars of %var(name) with
+the content of the name webber Vars.
+<p>
+ Example: You want to "evalauate" a webber var after the load vars phase
+of webber , currently webber only implements immediately (on the momment)
+var substituion with this proccesor you can evaleate a var after all the
+vars has been read.
+<p>
+Vars::LazyEval use the webber var #vars.lazyeval to define a  while separated
+list of webber vars to be Lazy Evaluates
+</dd>
+<dt>
+Vars::CopyVars
+</dt>
+<dd>
+ Copy the content of a webber Vars onto another one 
+<p>
+ Exmaple: You have an old Var definitin in which one variable is used for
+example for the "content" of the page, now you use another template with 
+another name, this processor allow to copy the old var and create a new
+one. Use the #vars.CopyVars, a white list of var_src:vars_dst pairs to define
+which vars to copy.
+ <p>
+  The separator has different meanings:
+<ul>
+
+     <li>   : Means straight Copy src:dst copy src always to dst
+     <li>   :? means conditional copiy src:?dst copy src to dst if dst is not defined
+     <li>   :+ means addition after src:+dst . dst will have the value of dst concatenated 
+            with the value of src (same value if dst wasn't defined 
+</ul>
+</dd>
+ 
+<dt>Vars::PathVars</dt>
+<dd>
+  Implements the following "special Vars":
+<ul>
+<li>  #vars.dep = Dep from wbbSourceRoot to the actual file (in number)
+<li>  #vars.pathtoroot = "Creates a Path" (concatation of "../.." to the wbbTargetRoot
+<li>  #vars.pathfromoot = "Path from the wbbTargetRoot to the file"
+</ul>
+Note: All this variables requires that file being webbered would  be in a directory
+below #vars.pathvars.wbbsourceroot (defaults to  wbbTargetRoot , to work correctly.
+</ul>
+</dd>
+</dl>
+

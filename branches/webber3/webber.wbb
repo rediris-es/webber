@@ -1,0 +1,22 @@
+## Webber configuration file $Id$
+##
+##
+## Main variables (used and/or set internally by webber itself)
+##
+##where the webber standard root start
+##wbbRoot=/Users/paco/programs/webber
+## Where "standard" processors are located
+#wbbProcLib= $var(wbbRoot)/proc
+#wbbProcLib=/usr/lib/webber/proc
+## Version
+#wbbVersion = Webber 1.3.1
+## Template dir name
+#wbbTemplateName= wbbdir.cfg
+#wbbFileNameRegExp = ^(.+)\.wbb$
+#wbbFileLangRegExp = ^.+(es|en|ca|gl)\.wbb$
+# Extension de las paginas
+#wbbExtension = .html
+##wbbDebugFile= $var(wbbRoot)/debug.txt
+#wbbDebugFile = /var/log/webber/debug.txt
+#wbbDebug = 10 
+#wbbPre = FileLang::filelang 

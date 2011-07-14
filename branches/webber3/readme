@@ -1,0 +1,28 @@
+
+Redme for webber.
+
+
+ This is a fresh port webber system, without any reference to the RedIRIS's implementation of it.
+
+Webber is mainly a HTML formatter, that has been used since 1995 at RedIRIS to build the HTML pages. It was designed mainly to:
+
+* Provide a uniform looking of all the HTML pages
+* Perform some linking (mostly language and menu pages) automatically
+
+So webber can be seen like a pre-Y2K CMS (Content Management System), that can be used to build static web pages with the 
+same look and feel without so much efford, it's mostly useful when you want to change this look and feel of the web pages
+without needing to rewrite all the web pages.
+
+ The basic installation of webber would have the following structure:
+ 
+binary webber, would be installed at PREFIX/bin
+libraries (Procs, in webber terminology), would go to $PREFIX/lib/webber/proc
+Documenation (html pages) , would be generated at $PREFIX/share/doc/webber
+
+Example templares would be found at $PREFIX/lib/webber/webs , with all the information,
+
+A configuaration example webber.cfg would be at $PREFIX/etc
+
+ 
+
+

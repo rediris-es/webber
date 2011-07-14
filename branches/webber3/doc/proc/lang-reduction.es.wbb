@@ -1,0 +1,16 @@
+#title= FileLang::langreduction
+#wbbPre + FileLang::langreduction
+#wbbIn=
+
+	Esto no se escribe
+
+#wbbIn-es=
+
+	Este es el contenido en castellano
+
+#wbbIn-en=
+
+	This is the english content
+
+
+

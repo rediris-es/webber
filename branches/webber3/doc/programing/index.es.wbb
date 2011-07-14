@@ -1,0 +1,73 @@
+#wbbPre + BodyFaq::bodyfaq Macros::macro
+#title= Escritura de procesadores Webber
+#wbbIn=
+
+
+TIT: Procesadores en webber.
+
+ Hacer procesadores Webber es bastante sencillo, un procesador es un trozo de código Perl , que implementa una función, webber al
+ejecutarse llama a esta función pasandole como argumento una referencia "puntero" a una tabla hash de valores (Variables webber), lo 
+que haga el procesador webber con estas variables es cosa suya. 
+<p>
+ Por comodidad cada procesador webber implemnte una serie de funciones "estandard" que son:
+
+ <dl>
+<dt>info</dt>
+	<dd>imprime por la salida estandard el nombre y una linea describiendose, esta es la salida de webber -I </dd>
+<dt>help</dt>
+	<dd>Muestra la ayuda del procesador, es la salida de webber -H</dd>
+<dt>debug</dt>
+	<dd>Permite "comunicar" el procesador con la función "debug" de webber, de forma que no haya problemas si el 
+procesador se ejecuta como programa Perl o vía web</dd>
+</dl>
+<p>
+
+TIT: Funciones que hacen algo.
+
+ Aunque no hay ninguna norma establecida, por lo general los procesadores webber contienen al menos una función "que hace algo", 
+y como guia de estilo se intenta que esta función tenga el mismo nombre que el procesador, aunque hay algunos procesadores que tienen
+más de una una función (y por estilo se podrían agrupar varias procesadores en un solo fichero.
+ 
+<p>
+La invocación de los procesadores desde webber se realiza incluyendo la función (y el módulo en cualquiera de las variables webber
+wbbPre, wbbProc , wbbPost, en formato de llamada Perl "Modulo::función", así para la ejecución de la función "printin", incluida en el
+fichero PrintIn.pm  se pondría en alguna de estas variables PrintIn::printin .
+ 
+TIT: PrintIn
+ El procesador "PrintIn" es un ejemplo mínimo de procesador que se puede emplear como "esqueleto" a la hora de crear nuevos procesadores,
+el código fuente de este procesador es el siguiente:
+<pre> 
+#includefile(../../proc/PrintIn.pm,,) 
+</pre>
+
+TIT: Debug
+
+ La función "debug" esta definida de forma que:
+<ul>
+<li> Si el procesador se ejecuta en modo "estanalone" perl PrintIn.pm , de un resultado correcto</li>
+<li>Si se ejectua desde el comando webber, se emplee el nivel de debug establacido por webber</li>
+<li>Si se ejecuta en modo "Web" , emplee los valores del módulo web</li>
+</ul>
+<p>
+La función como se puede ver en el código recive dos argumentos, el primero el nivel y el segundo el mensaje a mostrar, la función
+"debug" en el programa webber, permite en función de la variable wbbDebugFile , imprimir los mensajes por STDERR o escribirlos a un
+fichero para ir guardando ahí la depuración.
+
+TIT: Convenciones para el nombre de variables
+
+ Webber ha ido evolucionando a lo largo de más de 10 años y algunas  cosas han ido surgiendo por el camino y lo que antes parecía
+una buena idea se va descartando , después de la primer "webber Conference" en el 2008, pensamos que sería interesante tener una
+definición "homogenea de variables de la siguiente forma:
+<ul>
+<li> Las variables que empiecen por "wbb" son las variables que el programa "webber" entiende y conoce, se intentará que su numero
+sea reducido, para que el "armazon" de webber sea lo más ligero posible</li>
+<li> Las variables de procesadores deberían tener una construccion como nombre_fichero.procesador.valor , por ejemplo la variable
+"sep" (separador) del procesador dirindex incluido en el fichero Macros.pm , se llama a nivel webber "#macros.dirindex.sep" , es
+algo larga, pero esto permite que se pueda saber que variable toca cada procesador </p>
+<li> A ser posible nombres en ingles , y pueden ser largos de forma que se pueda entender que hacen</li>
+<li> Documentar en la documentación y en la ayuda del procesador que variables se emplean y como </li>
+<li> Definir valores "estandard" por defecto que permitan la ejecución del procesador sin tener que asignar muchas variables </li>
+</ul>
+<p>
+Esta denotación "por puntos" sirve por ejemplo para que un procesador "sepa" que variables buscar, por ejemplo el procesador de Menus
+busca 

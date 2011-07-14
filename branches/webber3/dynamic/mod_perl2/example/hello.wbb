@@ -1,0 +1,23 @@
+#wbbPre=
+#wbbPost=
+#wbbProc= Webbo::webbo
+#webbo.src= var:plantilla
+#plantilla=
+<html>
+
+<head>	<title><var name="title" /></title></head>
+
+<body>
+<var name="body" />
+</bodY>
+</html>
+
+#title= Webber PHP example page
+#body= 
+This is a PHP generated Webber Page, and an extreme one, 
+as all the information about the processor, template and so on is included d
+irectly in the template.
+<br>
+
+
+

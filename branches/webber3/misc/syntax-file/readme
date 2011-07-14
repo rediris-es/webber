@@ -1,0 +1,17 @@
+
+This is a HTML adapted syntax file for vim ,  to use:
+
+1. Copy wbb.vim to your .vim directory
+
+2. add in your .vimrc 
+
+au BufRead,BufNewFile *.wbb set filetype=wbb
+au BufRead,BufNewFile wbbdir.cfg set filetype=wbb
+au! Syntax wbb source PATH_TO_YOUR_HOME/.vim/wbb.vim 
+
+That's all
+
+ The only modification is that ## lines are treat as comments,
+and "#var=" entries as tokens
+
+

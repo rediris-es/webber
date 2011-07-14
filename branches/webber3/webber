@@ -1,0 +1,644 @@
+#!/usr/bin/perl
+#----------------------------------------------------------------------
+#                         __       __                      
+#                        /\ \     /\ \                     
+#       __  __  __     __\ \ \____\ \ \____     __   _  __  
+#      /\ \/\ \/\ \  /'__`\ \ '__`\\ \ '__`\  /'__`\/\`'__\
+#      \ \ \_/ \_/ \/\  __/\ \ \L\ \\ \ \L\ \/\  __/\ \ \/ 
+#       \ \___x___/'\ \____\\ \_,__/ \ \_,__/\ \____\\ \_\ 
+#        \/__//__/   \/____/ \/___/   \/___/  \/____/ \/_/ 
+#
+#----------------------------------------------------------------------
+# (c) 1996-2008 RedIRIS. The authors may be contacted by the email 
+#                        address: webbones@rediris.es
+#
+# $Id: webber,v 1.19.2.2 2008/07/31 14:33:42 paco Exp $
+# Webber is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation (http://www.fsf.org/copyleft/gpl.html).
+#
+# Webber is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+#----------------------------------------------------------------------
+
+
+
+# paquetes usados
+use POSIX;
+use Cwd;
+use Getopt::Std;
+use File::Path ;
+use strict ;
+
+no strict "refs";
+our (%var, %wbbDef, @environment ) ;
+
+
+### OK
+## declaración anticipada de algunas funciones
+sub debug; 	# Impresion de mensajes de depuracion
+sub push_var;	# Se va a tener un entorno (%var) comun, y 
+		# una pila de entornos, esto apila un entorno
+sub pop_var;    # Y esto recreea el anterior.
+
+sub readVars ;
+#
+## El entorno solo hace falta cuando procesemos directorios,
+#ya que en un fichero solo no hay problema (InitVar limpia el entorno)
+
+$ENV{'PATH'} = "/usr/local/bin:/usr/sbin:/usr/bin";
+
+# stack (pila) de entornos 
+@environment = () ; # Inicialmente vacio
+
+my @wbbProcLib = ();
+
+my (%opt) ;
+
+
+my $name="Webber";
+my $version="1.20.1";
+my $copyright="Copyright 1996-2008, RedIRIS";
+
+
+
+getopts ("C:dfhmirHIt:v", \%opt );
+
+# Sets some webber vars  
+$wbbDef{'wbbRecursive'}   =  0 ;
+$wbbDef{'wbbForceupdate'} =  0 ;
+$wbbDef{'wbbMakedir'}     =  1 ; 
+
+if (defined $opt{h}) { &showHelp; }
+
+$var{'wbbDebug'} = $opt{d} if ( defined $opt{d})  ;
+
+#---- Configuracion
+
+# Some defaults values
+$wbbDef{'wbbTargetFileMode'} = "0444" ; # FileMode Mask
+$wbbDef{'wbbTemplateName'} = "wbbdir.cfg" ;
+$wbbDef{'wbbFileNameRegExp'} = '^(.+)\.wbb$' ; 
+$wbbDef{'wbbExtension'} = ".html" ;
+$wbbDef{'wbbVersion'} = "$name $version" ;
+
+
+# Populate some %def from environment or set it to some values
+
+
+$wbbDef{'wbbRoot'} =   defined $ENV{'WBBROOT'}   ?  $ENV{'WBBROOT'} : getcwd()  ;
+$wbbDef{'wbbConfig'} = defined $ENV{'WBBCONFIG'} ?  $ENV{'WBBCONFIG'} :  (-r "/etc/webber/webber.wbb" ? "/etc/webber/webber.wbb" : "webber.wbb" ) ;
+$wbbDef{'wbbConfig'} = defined ($opt{C} ) ?  $opt{C} : $wbbDef{'wbbConfig'} ;
+
+readVars (NormalizePath(  $wbbDef{'wbbConfig'}  ) , 'configuration', \%wbbDef ) ;
+
+$wbbDef{'wbbRecursive'}   = ($opt{r} ) ? 1 : $wbbDef{'wbbRecursive'} ;
+$wbbDef{'wbbForceupdate'} = ($opt{f}) ?  1 : $wbbDef{'wbbForceUpdate'}  ;
+$wbbDef{'wbbMakedir'}     = ($opt{m})  ?  0 :$wbbDef{'wbbMakedir'} ;
+
+$wbbDef{'wbbDebug'}  = defined $ENV{'WBBDEBUG'}   ?  $ENV{'WBBDEBUG'} :  defined $wbbDef{'wbbDebug'} ? $wbbDef{'wbbDebug'} : 10   ;
+$wbbDef{'wbbDebugFile'} = defined $ENV{'WBBDEBUGFILE'} ? $ENV{'WBBDEBUGFILE'} : defined $wbbDef{'wbbDebugFile'} ? $wbbDef{'wbbDebugFile'} : '' ;
+
+$wbbDef{'wbbexttmp'} = defined $ENV{'WBBEXTTMP'} ?  $ENV{'WBBEXTTMP'} : defined $wbbDef{'wbbexttmp'} ? $wbbDef{'wbbexttmp'} : '.tmp' ;
+
+$wbbDef{'wbbTargetRoot'} = defined $ENV{'WBBTARGETROOT'} ? $ENV{'WBBTARGETROOT'} : defined $wbbDef{'wbbTargetRoot'} ? $wbbDef{'wbbTargetRoot'} : "$wbbDef{'wbbRoot'}" . "/src"  ;
+$wbbDef{'wbbSourceRoot'} = defined $ENV{'WBBSOURCEROOT'} ? $ENV{'WBBSOURCEROOT'} : defined $wbbDef{'wbbSourceRoot'} ? $wbbDef{'wbbSourceRoot'} : "$wbbDef{'wbbRoot'}" . "/html" ;
+
+
+
+@wbbProcLib = split /\s+/, $wbbDef{'wbbProcLib'} ;
+
+use lib @wbbProcLib;
+foreach my $path (@wbbProcLib ) { 
+  debug (3, "Debug:(Webber Main) adding $path to \@lib\n") ; push @INC, $path ;
+}
+
+
+print STDERR "Debug:(Webber::Main) Used file $opt{C} for config\n"  if $opt{d};
+
+if (defined $opt{v}) {
+  print STDERR "This is $name, v$version\n\n$copyright\n";
+  exit;
+}
+
+if (defined $opt{H}) {
+   &proccessors('help',
+                "There is no help available for this proccesor\n",
+                "\n------------\n",) ;
+}
+if (defined $opt{I} ) {
+   &proccessors('info',
+   "There is no information available about this proccesor\n",
+   "=>");
+}
+
+debug (3,"Debug:(Webber Main) Calling initvars 1\n" ) ;
+
+&InitVars;
+
+debug(1,"Debug:(Webber Main) webber start ..");
+
+
+if ($opt{t} ne "") {
+   &readVars($opt{t}, "source file", \%var);
+  $var{'wbbInteractive'}="1" ; 
+}
+
+if ($opt{i} eq "1") {
+   $var{'wbbInteractive'} = 1; 
+   &ReadFile;
+#   &process($pag,\%var);
+    &process("") ;
+}
+else {
+   while (my $page = shift(@ARGV)) {
+      my $currentdir = getcwd();
+      if (-d $page) {
+         if ($page !~ /^\.\.$/) {
+	    debug (1,"Debug:(Webber Main) go for dir: $page\n") ;
+            chdir($page);
+            my $cwd = getcwd(); 
+            $cwd =~ /^(.*)\//;
+            my $tdir = $1;
+            &InitVars;
+#	    print "cwd =$cwd\ntdir=$tdir\nwbSR=$var{'wbbSourceRoot'}\n" ;
+            &ReadTemplatesRec($tdir) if ( ($cwd ne $var{'wbbSourceRoot'}) & ($tdir ne "")) ;
+            chdir($cwd);
+            &ProcessDir(\%var);
+            chdir($currentdir);
+         }  
+      }
+      elsif (-f $page) {
+         my @page = split /\//, $page;
+         my $dir = join "/", @page[0..$#page-1];
+         my $pag = $page[$#page];
+         die "Can't access dir $dir" if "$dir" ne "" and !(chdir ($dir));
+         my $cwd = getcwd();
+         &InitVars;
+         &ReadTemplatesRec($cwd);
+ 	if ($pag =~ /$var{wbbFileNameRegExp}/ && $pag ne $var{wbbTemplateName}) {
+	    debug (1, "Debug:(Webber Main) go for file: $page\n") ;
+	    debug (1, "wbbTargetRoot is $var{'wbbTargetRoot'}" );
+            &process($pag );
+         }
+         else { debug (1,"Debug:(Webber Main) Skip file $cwd/$pag\n"); }
+         chdir($currentdir);
+      }
+      else { die "Directory or file: $page does not exist"; }
+   }
+}
+
+#----------------------------------------------------------------------
+# Function: showHelp
+#----------------------------------------------------------------------
+sub showHelp {
+   printf "Usage: webber [-C <configFile>] [-d] [-f] [-h] [-i] [-I] [-m] [-r] [-t <tmplFile>] [-v] (dir|file) [(dir|file)... ]\n\n";
+   printf "-C set a different config file\n";
+   printf "-d turn debugging on\n";
+   printf "-f force updating of target files\n";
+   printf "-h show this message and exit\n";
+   printf "-H show the help page of installed proccessors\n";
+   printf "-i use standard i/o, not file\n";
+   printf "-I list installed proccessors\n";
+   printf "-m NOT create target directories if they do not exist\n";
+   printf "-r recurse through source directories\n";
+   printf "-t same as -i but uses a template file\n";
+   printf "-v show program name and version\n";
+   printf "<dir>   Process the contents of a directory\n";
+   printf "<file>  Process an individual source file\n";
+   printf "\nSee also $opt{C}\n";
+   exit;
+}
+
+#----------------------------------------------------------------------
+# Function: proccessors
+#----------------------------------------------------------------------
+sub proccessors {
+   my $comm= $_[0];
+   my $nocomm = $_[1];
+   my $output= $_[2];	
+   my ($x,$i,$xx,$val);
+   my @xx;
+   foreach $i (@wbbProcLib) {
+      opendir DIR, $i || die "Can't open directory $i!!\n";
+      my @temp=readdir (DIR);
+      closedir DIR;
+      foreach $x (@temp ) {
+	 next if ($x eq "CVS");
+	 next if ($x =~ /^\./) ;
+
+         my @xx= split /\./, $x;
+         pop @xx;
+         my $y = join "." , @xx;
+         require $i.  "/$x";
+         my $com= $y . "::" .$comm;
+         if (defined &$com) {
+            print $x, $output;
+            $val = &$com;
+         }
+         else { print $x, $output, $nocomm; }
+      }
+   }
+   exit;
+}
+
+#----------------------------------------------------------------------
+# Function: untaint
+#----------------------------------------------------------------------
+sub untaint {
+   my ($arg) = @_;
+   $arg =~ m/^(.*)$/;
+   return $1;
+}
+
+#----------------------------------------------------------------------
+# Function: readVars
+# Change:
+#  Add a another arguments, the %hash used for storing the information
+#  So this can be used to initialize not only the %var hash but also
+#  the %wbbDef .
+#----------------------------------------------------------------------
+sub readVars {
+   my ($file, $type,$ref) = @_;
+   my $varname = "";
+   my $target= "";
+   if ($file ne "-") {
+      $varname = "";
+  if ($type eq "configuration") { $target=$file ; }
+	else {   $target = getcwd()."/$file"; }
+      return if ($type eq "template" and not -f $file); 
+      die "Unable to read $target" if (not -r $file);
+   }
+   return if ($type ne "template" and $type ne "configuration" and
+              exists $$ref{"wbbExtParser"} and $$ref{"wbbExtParser"} != 0);
+
+   if (defined $$ref{'wbbInteractive'} && ( $$ref{'wbbInteractive'}  eq "1")   ) { open INFILE ,"-" ; }
+   else { open INFILE,"<". untaint ("$file") ; }
+   my $lno = 0;
+   my $varname = "" ;
+   debug (1,"Debug: (readVars) processing $type: $target\n" ) ;
+   $var{'wbbActualfile'} = $target ;
+   while (my $line = <INFILE>) {
+      if ($line =~ /^##/) {
+	 if ($varname ne "") { debug (2, "Debug:(readVars) $varname := $$ref{$varname}\n")  ; }
+         $varname = "";
+      }
+      elsif ($line =~ /^#([\w]+[a-zA-Z0-9_.\-\$]*)\s*\=\s*(.*)$/) {
+	 if ($varname ne "") { debug (2,"Debug:(readVars) $varname := $$ref{$varname}\n") ; }
+         $$ref{"$1"} = EvaluateVar ($2, $ref );
+         $varname = "$1";
+      }
+      elsif ($line =~ /^#([\w]+[a-zA-Z0-9_.\-\$]*)\s*\+\s*(.*)$/) {
+	 if ($varname ne "") { debug(2, "Debug:(readVars) $varname := $$ref{$varname}\n") ; }
+         if (exists $$ref{"$1"}) { $$ref{"$1"} .= " " . EvaluateVar($2, $ref) ; }
+         else { $$ref{"$1"} = EvaluateVar ($2, $ref) ; }
+         $varname = "$1";
+      }
+      elsif ($line =~ /^#([\w]+[a-zA-Z0-9_.\-\$]*)\s*\*\s*(.*)$/) {
+	 if ($varname ne "") { debug(2, "Debug:(readVars) $varname := $$ref{$varname}\n") ; }
+         if (exists $$ref{"$1"}) { $$ref{"$1"} = EvaluateVar($2, $ref) . " "  . $$ref{"$1"}; }
+         else { $$ref{"$1"} = EvaluateVar ($2, $ref) ; }
+         $varname = "$1";
+      }
+      else {
+         if ($varname eq "") {
+            chop $line;
+# Ignore blank lines outside variable definitions without error
+            if ($line !~ /^[\s]*$/) {
+              print STDERR "Syntax error in $type $target: \"$line\" ignored\n";
+            }
+         }
+         else {
+            my $lc = chop $line;
+            $line .=  $lc if (ord($lc) ne 10); # Si no es un \n
+            $$ref{"$varname"} .= "\n" . EvaluateVar($line , $ref) ;
+         }
+      }
+   }
+   if ($varname ne "") { debug(2, "Debug:(readVars) $varname := $$ref{$varname}\n") ; } 
+   close INFILE;
+}
+
+#----------------------------------------------------------------------
+# Function: process
+#----------------------------------------------------------------------
+sub process {
+   my ($page, $global) = @_;
+
+   push_var ;
+   my (@tempo, $package, $sname);
+   @INC = @lib::ORIG_INC;
+   unshift @INC, @wbbProcLib;
+
+   $var{"wbbSource"} = $page;
+   $var{'wbbOut'} ="";
+
+   debug 2, "wbbTargetRoot is $var{'wbbTargetRoot'}\n" ;
+   my ($name, $lang);
+   if (! ((defined $var{'wbbInteractive'}) && ( $var{'wbbInteractive'}  eq "1")  )) {
+      if ($page =~ /$var{wbbFileNameRegExp}/) { $name = $1; }
+      else { $name = $page; }
+      
+     $var{"wbbTarget"} = $name;
+	  $var{"wbbTargetName"} = $var{"wbbTarget"}.$var{"wbbExtension"};
+      $var{"wbbTarget"} =~ s/\.$lang$// if ($lang ne "");
+   }
+
+   $var{"wbbIn"}="" if !exists $var{"wbbIn"};
+    
+   ((-f "$page") ||  (defined $var{'wbbInteractive'} && ( $var{'wbbInteractive'}  eq "1") )) || die "No such page $page.\n";
+   my (@stats) = stat _;
+
+   &readVars ($page, "source file", \%var) unless (defined $var{'wbbInteractive'} && ( $var{'wbbInteractive'}  eq "1")) ;
+
+   my $target ;
+   if ($var{'wbbTargetRoot'} =~ /absolutePath:\s*(.*)/) {
+	$target =$1 ; 
+	debug 1, "absolutepath targetroot =$var{'wbbTargetRoot'}" ;		
+	}
+   else {
+	 $target = getcwd();
+	 $var{'wbbSourceRoot'} = NormalizePath ($var{'wbbSourceRoot'} ) ;
+	 $var{'wbbTargetRoot'} = NormalizePath ($var{'wbbTargetRoot'}) ;
+	my $base= s/$var{'wbbSourceRoot'}// ;
+	if ($target =~ /.*$var{'wbbSourceRoot'}.*/ ) {
+         		$target =~ s/^$var{'wbbSourceRoot'}/$var{'wbbTargetRoot'}/;
+			}
+	else {
+	        debug 0, "NOTICE: Webbering file outside wbbSourcePath, Setting target to: root wbTargetRoot" ;
+ 		my @temp = split /\//, $target ;
+		my $target = $base  . "/" . pop @temp ; 
+		debug 1, " target is $target" ;
+	}
+	}
+   
+  
+   if  (($var{'wbbMakedir'} == 1  ) and  (not -d $target))
+   {
+    debug (1,"creating path $target") ;
+     mkpath ( untaint("$target") ,0,0755) ;
+   }
+	else{ debug 1, " no se cumple condicion $var{'wbbMakedir'}  $opt{m}" ;}
+
+  if (not -d $target ) { 		debug 0,  " ojo con -d target $target"; }
+
+   $target .= "/$name$var{wbbExtension}";
+   
+   if (($var{'wbbForceupdate'} ==0 )and (my $targetdate = (stat "$target")[9] )) {
+      if ($stats[9]<=$targetdate) {
+         print STDERR "$target is more recent than $page. Skipping\n";
+         return;
+      }
+   }
+ 
+   if  (( defined $var{'wbbInteractive'}) && ( $var{'wbbInteractive'}  eq "1") ) {
+#      chmod 0644, untaint ("$target");
+#      unlink (untaint ("$target"));
+	 }
+
+	else {
+       
+      debug (1,"Debug:(process) Target File is " . untaint ($target . $var{'wbbexttmp'}) ) ;
+
+
+  	$var{'wbbTarget'} = $target ;
+	$var{'wbbTargetTmp'} = $target . $var{'wbbexttmp'}  ;
+	$var{'wbbTargetRelative'} = $var{'wbbTarget'} ;
+	$var{'wbbTargetRelative'} =~ s/$var{'wbbTargetRoot'}// ;
+
+   }
+	
+   unshift @INC, (getcwd(), split /\s/, $var{'wbbProcs'});
+
+   my $pre =  $var{'wbbPre'};
+   my $proc = $var{'wbbProc'};
+   my $post = $var{'wbbPost'};
+   debug (1, "Pre-processor(s): $pre\n" ) ; 
+   debug (1, "Processor(s): $proc\n" ) ;
+   debug (1, "Post-processor(s): $post\n" ) ;
+
+   my $thisp ;	
+   if ($pre ne "") {
+      @tempo = split /\s+/, $pre;
+      foreach $thisp (@tempo) {
+	 next unless $thisp =~ /\w+/ ;
+	 debug (1," Using pre-processor $thisp ..." ) ;
+         ($package, $sname) = split /::/,$thisp;
+         require $package .".pm" ;
+         &$thisp( \%var );
+	 debug (1, "\n" ) ;
+      }
+   }
+
+   if ($proc ne "") {
+      @tempo = split /\s+/, $proc;
+      foreach $thisp (@tempo) {
+	 next unless $thisp =~ /\w+/ ;
+         debug (1,"Using processor $thisp ...");
+         ($package, $sname) = split /::/,$thisp;
+         require $package.".pm";
+         &$thisp(\%var );
+         debug (1,"\n") ;
+      }
+   }
+   else  { $var{'wbbOut'} .= $var{'wbbIn'}; }
+
+   debug(1, "Fase de Postproceso\n") ;	
+   if ($post ne "") {
+	debug 1, "post es $post" ;
+      @tempo = split /\s+/, $post;
+      foreach $thisp (@tempo) {
+  	 next unless $thisp=~ /\w+/ ;
+         debug (1,"Using post-proccesor $thisp ..." ); 
+         ($package, $sname) = split /::/,$thisp;
+         require $package.".pm";
+         &$thisp( \%var );
+         debug (1, "\n");
+      }
+   }
+
+# OutPut to STDOUT
+
+# This is where the real magic is done
+#
+
+      open  FILE  , ">".untaint($var{'wbbTarget'} . $var{'wbbexttmp'} ) || die "Can't write to $target.$var{'wbbexttmp'}\n" ; 
+
+    print FILE   $var{'wbbOut'} ;
+    debug (2, "wbbOut written in $var{'wbbTarget'}$var{'wbbexttmp'} " ) ;
+   close (FILE);
+# Now the move
+   unlink $var{'wbbTarget'}  if -e  $var{'wbbTarget'}   ;
+   rename $var{'wbbTarget'}  . $var{'wbbexttmp'} , $var{'wbbTarget'}  ;
+   debug (2,"file  $var{'wbbTarget'}$var{'wbbexttmp'}  renamed to  $var{'wbbTarget'} ") ; 
+   chmod oct $var{"wbbTargetFileMode"}, untaint ($var{'wbbTarget'} );
+
+    # end
+    pop_var ;
+}
+	
+#----------------------------------------------------------------------
+# Function: InitVars
+#----------------------------------------------------------------------
+sub InitVars {
+   %var = () ;
+   foreach my $k (keys %wbbDef) { $var{$k} = $wbbDef{$k}; 
+#	debug (3,"Debug: (InitVars) var{$k} =$main::var{$k}") ;
+ }}
+
+#----------------------------------------------------------------------
+# Function: ReadTemplate
+#----------------------------------------------------------------------
+sub ReadTemplate {
+   debug(1, "Debug: looking for template at ", getcwd() . "\n" ) ;
+   &readVars ($var{wbbTemplateName}, "template", \%var);
+}
+
+#----------------------------------------------------------------------
+# Function: ReadTemplatesRec
+#----------------------------------------------------------------------
+sub ReadTemplatesRec {
+   my($dir) = @_;
+   debug(1, "Debug: (ReadTemplatesRec) processing recursive templates at \"$dir\" \n") ;
+   $dir =~ /^(.*)\//;
+   my $newdir = $1;
+   &ReadTemplatesRec($newdir) if (($dir ne $var{'wbbSourceRoot'} || $dir eq "/" || ($dir =~ /.:/)) && ($newdir ne ""));
+   chdir($dir);
+   &ReadTemplate;
+}
+
+#----------------------------------------------------------------------
+# Function: ReadFile
+#----------------------------------------------------------------------
+sub ReadFile {
+   &readVars("-","-", \%var);
+   foreach my $k (keys %wbbDef) { $var{$k} = $wbbDef{$k} unless exists $var{$k}; }
+}
+
+#----------------------------------------------------------------------
+# Function: ProcessDir
+#----------------------------------------------------------------------
+sub ProcessDir {
+	
+  debug (1, "Debug: processing directory at ", getcwd(), "\n" ) ;
+   push_var ; 
+   &ReadTemplate;
+   my(@pages,@dirs);
+   opendir DIR, "."; 
+   while (my $direntry = readdir(DIR)) {
+	debug 3, "dir entry $direntry" ;
+      next if (-l $direntry or -p $direntry or -S $direntry or -b $direntry or
+               -c $direntry or -t $direntry);
+#      next if (-l $direntry or -p $direntry or -S $direntry or -b $direntry or
+#               -c $direntry);
+
+	debug 3, "pasa por aqui" ; 
+      if (-d $direntry && $direntry !~ /^\.$/ && $direntry !~ /^\.\.$/) {
+         push @dirs, $direntry;
+      }
+        elsif (-f $direntry && $direntry =~ /$var{wbbFileNameRegExp}/ && 
+	     $direntry ne $var{wbbTemplateName}) {
+		debug ( 3, "pushed $direntry in the proccess queue" ) ;
+         push @pages, $direntry;
+      }
+
+		else  { debug 3, "not pushed $direntry in the process queue";
+	}
+   }
+   foreach my $page (@pages) {  process($page); }
+   if ($var{'wbbRecursive'}) {
+      foreach my $dir (@dirs) { 
+         chdir("./$dir"); 
+         &ProcessDir(\%var); 
+         chdir("..");
+      }
+   }
+ pop_var ;
+}
+
+#----------------------------------------------------------------------
+# Function: NormalizePath
+#----------------------------------------------------------------------
+sub NormalizePath {
+  my $wPath = shift;
+  
+  # Por si alguien pone 
+  # /Volumes/////repositorio/WWW2/www.rediris.es//src/
+  $wPath =~ s/\/\/+/\//g ;
+  # Eliminamos la última barra "/"
+  $wPath =~ s/\/$//g;
+
+  return $wPath;
+}
+
+#-------------------------------------------------------------------------
+# Function: EvaluateVar
+# ------------------------------------------------------------------------
+sub EvaluateVar  {
+        my $lin = $_[0] ;
+	my $ref = $_[1] ;
+	my $c ;
+        while ($lin =~ /.*\$var\(([\w]+[a-zA-Z0-9_.\-]*)\).*/ ) {
+		$c = $$ref{$1} ;
+		debug (2, "Var $1 evaluada, valor =$c") ;
+                $lin =~ s/\$var\($1\)/$c/ ;
+        }
+	while ($lin =~ /.*\$env\(([\w]+[a-zA-Z0-9_.\-]*)\).*/ ) {
+		$c = $ENV{$1} ;
+		debug 2, "evaluacion de entorno de $1!!\n" ;
+		$lin =~ s/\$env\($1\)/$c/ ;
+	}
+	while ($lin =~ /.*\$orig\(([\w]+[a-zA-Z0-9_.\-]*)\).*/ ) {
+		$c = $wbbDef{$1} ;
+		debug 2,  "evaluacion de original de $1!!\n" ;
+		$lin =~ s/\$orig\($1\)/$c/ ;
+	}
+
+  
+        return $lin ;
+        }
+
+#-------------------------------------------------------------------------
+# Function: debug 
+#-------------------------------------------------------------------------
+sub debug {
+	my @lines = @_ ;
+	my $level = shift @lines ;
+	if ($level <= $var{'wbbDebug'} ) {
+	my $line= join '', @lines ;
+	chomp $line ;
+	if ( defined ($var{'wbbDebugFile'}) && $var{'wbbDebugFile'} !~/stderr/i)   {
+		open FILE, ">>$var{'wbbDebugFile'}" ;
+		print FILE "$line\n" ;
+		close FILE ;
+	}
+	else {
+	print STDERR "wbbDebugFile no existe\n" ;
+	print STDERR "$line\n"  if  defined $var{'wbbDebug'} ;
+	}
+	}
+}
+# Auxiliar de debug
+sub wbbdebug {
+	debug (@_) ;
+	 }
+#--------------------------------------------------------------------------
+# Function: push_var
+# -------------------------------------------------------------------------
+# Apila el entorno que esta en %var
+sub push_var {
+	my %hash ;
+	foreach my $key (keys %var) {  $hash{$key} = $var{$key} ; }
+	push @environment , \%hash ;
+	}
+#--------------------------------------------------------------------------
+# Function: pop_var
+#--------------------------------------------------------------------------
+# Restaura el entorno tal y como estaba
+sub pop_var {
+	my $ref= pop @environment ;
+	%var =() ; # Nos cargamos todas las variables
+	foreach my $key (keys %$ref ) { $var{$key} = $$ref{$key} ; }
+}
