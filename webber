@@ -362,7 +362,7 @@ sub process {
 
    $var{"wbbSource"} = $page;
    $var{'wbbOut'} ="";
-
+   debug 2, "Process: file= $var{'wbbSource'} \n" ;   
    debug 2, "wbbTargetRoot is $var{'wbbTargetRoot'}\n" ;
    my ($name, $lang);
    if (! ((defined $var{'wbbInteractive'}) && ( $var{'wbbInteractive'}  eq "1")  )) {
@@ -413,7 +413,7 @@ sub process {
   if (not -d $target ) { 		debug 0,  " ojo con -d target $target"; }
 
    $target .= "/$name$var{wbbExtension}";
-   
+    
    if (($var{'wbbForceupdate'} ==0 )and (my $targetdate = (stat "$target")[9] )) {
       if ($stats[9]<=$targetdate) {
          print STDERR "$target is more recent than $page. Skipping\n";
@@ -430,9 +430,8 @@ sub process {
        
       debug (1,"Debug:(process) Target File is " . untaint ($target . $var{'wbbexttmp'}) ) ;
 
-
-  	$var{'wbbTarget'} = $target ;
-	$var{'wbbTargetTmp'} = $target . $var{'wbbexttmp'}  ;
+	$var{'wbbActualFile'} = $var{'wbbSource'} ;	
+  	$var{'wbbTarget'} =  untaint ($target ) ;  # NOTA Seguramente esto debería ser "depraced" 
 	$var{'wbbTargetRelative'} = $var{'wbbTarget'} ;
 	$var{'wbbTargetRelative'} =~ s/$var{'wbbTargetRoot'}// ;
 

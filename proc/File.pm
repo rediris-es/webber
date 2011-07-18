@@ -6,7 +6,11 @@
 # old webber System
 #
 
+
 package File;
+
+use Cwd;
+use strict ;
 
 ## Funciones auxiliares
 
@@ -25,6 +29,8 @@ sub debug {
         }
 }
 # End Funcion debug
+
+
 #----------------------------------------------------------------------
 # Function: untaint
 #----------------------------------------------------------------------
@@ -35,6 +41,9 @@ sub untaint {
 }
 
 
+
+
+#### Main 
 my $name=	"File";
 my $version=	"1.0";
 
@@ -66,7 +75,8 @@ File::WriteVar uses the following Webber variables:
 ReadVars: Read Webber Vars from a file , add all the vars read to the webber Vars
 
 File::ReadVars uses the following Webber variable:
-  wbb
+  wbbSource: Filename to read 
+ 
 FINAL
 }
 
@@ -74,20 +84,107 @@ sub WriteVar
 {
 
   my $refvar =$_[0] ;
+    my $outvar="wbbOut" ;
+   if (defined $$refvar{'File::WriteVar'} ) { $outvar=$$refvar{'File.WriteVar'} ; }
 
-  open  FILE  , ">".untaint($refvar{'wbbTarget'} . $refvar{'wbbexttmp'} ) || die "Can't write to $trefvar{'wbbtarget'}.$var{'wbbexttmp'}\n" ;
-
-    print FILE   $refvar{$refvar{'File.WriteVar'}} ;
-    debug (2, "$refvar{'File.WriteVar'} written in $refvar{'wbbTarget'}$refvar{'wbbexttmp'} " ) ;
+   debug (3, "Output file is $$refvar{'wbbTarget'} and output content is defined in variable $outvar\n" );	
+ 
+  open  FILE  , ">" . untaint($$refvar{'wbbTarget'} . $$refvar{'wbbexttmp'} ) || die "Can't write to $$refvar{'wbbtarget'}.$$refvar{'wbbexttmp'}\n" ;
+    print FILE "XXX" ;
+    print FILE   $$refvar{$outvar}  ;
+    debug (2, "$outvar  written in $$refvar{'wbbTarget'}$$refvar{'wbbexttmp'} " ) ;
    close (FILE);
 # Now the move
-   unlink $refvar{'wbbTarget'}  if -e  $refvar{'wbbTarget'}   ;
-   rename $refvar{'wbbTarget'}  . $refvar{'wbbexttmp'} , $refvar{'wbbTarget'}  ;
-   debug (2,"file  $refvar{'wbbTarget'}$refvar{'wbbexttmp'}  renamed to  $refvar{'wbbTarget'} ") ;
-   chmod oct $refvar{"wbbTargetFileMode"}, untaint ($refvar{'wbbTarget'} );
+   unlink $$refvar{'wbbTarget'}  if -e  $$refvar{'wbbTarget'}   ;
+   rename $$refvar{'wbbTarget'}  . $$refvar{'wbbexttmp'} , $$refvar{'wbbTarget'}  ;
+   debug (2,"file  $$refvar{'wbbTarget'}$$refvar{'wbbexttmp'}  renamed to  $$refvar{'wbbTarget'} ") ;
+   chmod oct $$refvar{"wbbTargetFileMode"}, untaint ($$refvar{'wbbTarget'} );
 
 }
 
 if ($0 =~ /$name/) { &help; die ("\n"); }
 
+sub ReadVars {
+	my $refvar =$_[0] ;
+	my $file =$$refvar{'wbbSource'} ;
+   my $target=  getcwd() ."/$file" ; 
+
+    open INFILE,"<". untaint ("$file") ; 
+   my $lno = 0;
+   my $varname = "" ;
+   debug (1,"  File::ReadVarsreadVars processing file $target\n" ) ;
+   $$refvar{'wbbActualfile'} = $target ;
+   while (my $line = <INFILE>) {
+      if ($line =~ /^##/) {
+	 if ($varname ne "") { debug (2, "Debug:(readVars) $varname := $$refvar{$varname}\n")  ; }
+         $varname = "";
+      }
+      elsif ($line =~ /^#([\w]+[a-zA-Z0-9_.\-\$]*)\s*\=\s*(.*)$/) {
+	 if ($varname ne "") { debug (2,"Debug:(readVars) $varname := $$refvar{$varname}\n") ; }
+         $$refvar{"$1"} = EvaluateVar ($2, $refvar );
+         $varname = "$1";
+      }
+      elsif ($line =~ /^#([\w]+[a-zA-Z0-9_.\-\$]*)\s*\+\s*(.*)$/) {
+	 if ($varname ne "") { debug(2, "Debug:(readVars) $varname := $$refvar{$varname}\n") ; }
+         if (exists $$refvar{"$1"}) { $$refvar{"$1"} .= " " . EvaluateVar($2, $refvar) ; }
+         else { $$refvar{"$1"} = EvaluateVar ($2, $refvar) ; }
+         $varname = "$1";
+      }
+      elsif ($line =~ /^#([\w]+[a-zA-Z0-9_.\-\$]*)\s*\*\s*(.*)$/) {
+	 if ($varname ne "") { debug(2, "Debug:(readVars) $varname := $$refvar{$varname}\n") ; }
+         if (exists $$refvar{"$1"}) { $$refvar{"$1"} = EvaluateVar($2, $refvar) . " "  . $$refvar{"$1"}; }
+         else { $$refvar{"$1"} = EvaluateVar ($2, $refvar) ; }
+         $varname = "$1";
+      }
+      else {
+         if ($varname eq "") {
+            chop $line;
+# Ignore blank lines outside variable definitions without error
+            if ($line !~ /^[\s]*$/) {
+              print STDERR "Syntax error in $target: \"$line\" ignored\n";
+            }
+         }
+         else {
+            my $lc = chop $line;
+            $line .=  $lc if (ord($lc) ne 10); # Si no es un \n
+            $$refvar{"$varname"} .= "\n" . EvaluateVar($line , $refvar) ;
+         }
+      }
+   }
+   if ($varname ne "") { debug(2, "Debug:(readVars) $varname := $$refvar{$varname}\n") ; } 
+   close INFILE;
+}
+
+
+#-------------------------------------------------------------------------
+# Function: EvaluateVar
+# ------------------------------------------------------------------------
+sub EvaluateVar  {
+        my $lin = $_[0] ;
+	my $ref = $_[1] ;
+	my $c ;
+        while ($lin =~ /.*\$var\(([\w]+[a-zA-Z0-9_.\-]*)\).*/ ) {
+		$c = $$ref{$1} ;
+		debug (2, "Var $1 evaluada, valor =$c") ;
+                $lin =~ s/\$var\($1\)/$c/ ;
+        }
+	while ($lin =~ /.*\$env\(([\w]+[a-zA-Z0-9_.\-]*)\).*/ ) {
+		$c = $ENV{$1} ;
+		debug 2, "evaluacion de entorno de $1!!\n" ;
+		$lin =~ s/\$env\($1\)/$c/ ;
+	}
+#	while ($lin =~ /.*\$orig\(([\w]+[a-zA-Z0-9_.\-]*)\).*/ ) {
+#		$c = $wbbDef{$1} ;
+#		debug 2,  "evaluacion de original de $1!!\n" ;
+#		$lin =~ s/\$orig\($1\)/$c/ ;
+#	}
+
+  
+        return $lin ;
+        }
+
+
+
+
+	
 1;
