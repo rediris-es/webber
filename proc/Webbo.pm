@@ -16,6 +16,7 @@
 #----------------------------------------------------------------------
 package Webbo;
 use Cwd;
+use strict ;
 
 my $name=	"Webbo";
 my $version=	"2.1";
@@ -30,16 +31,22 @@ my $expVAR2= '\"\s*\/>';
 #-------------------------------------------------------------------------
 sub debug {
         my @lines = @_ ;
-        my $level = shift @lines ;
+# Por el tema de strict 
+	no strict "subs" ;
         if (defined (&wbbdebug)) { wbbdebug (@lines) ; }
-	elsif (defined main::debug) { main::debug (@lines) ; }
-        else {
+        elsif (defined main::debug) { main::debug (@lines) ; }
+       else {
+          my $level = shift @lines ;
         my $line= join '', @lines ;
         chomp $line ;
         print STDERR "$line\n" ;
         }
-        }
+use strict "subs" ;
+# Joder mierda del strict 
+}
 # End Funcion debug
+
+
 
 sub info {
    print "$name: v$version: Incorporate variables into page templates\n";
@@ -94,9 +101,13 @@ FINAL
 #----------------------------------------------------------------------
 sub webbo
 {
-   $var = $_[0];
+   my $var = $_[0];
 
     debug  (1, "Webbo::webbo se ejecuta") ;
+    debug  (1, "webbo.src = $$var{'webbo.src'}") ;
+    debug  (1, "webbo.dst = $$var{'webbo.dst'}\n") ;
+   my ($webboSrc , $webboDst) ;
+
 if (exists $$var{"webbo.src"}) 
 {
   my ($srcClass, $srcName) = split /:/,$$var{"webbo.src"};
@@ -120,7 +131,7 @@ else
   $webboSrc = $$var{wbbIn};
 }
 
-$webboDst = "wbbOut";
+ $webboDst = "wbbOut";
 $webboDst = $$var{"webbo.dst"} if exists $$var{"webbo.dst"};
    debug  (1, "Webbo: La salida estara en $webboDst") ;
 #-- FALTA --
@@ -131,7 +142,7 @@ $webboDst = $$var{"webbo.dst"} if exists $$var{"webbo.dst"};
 
    #-- Lo hacemos 2 veces porque se ha dado el caso en el que con
    #   una sola vez no se resolvían todas las variables
-   for ($i=1 ; $i<=2 ; $i++)
+   for (my $i=1 ; $i<=2 ; $i++)
    {
      foreach my $k ( sort keys %$var) 
      {
@@ -151,8 +162,8 @@ $webboDst = $$var{"webbo.dst"} if exists $$var{"webbo.dst"};
 #----------------------------------------------------------------------
 sub leeDatos
 {
-local ($file) = @_;
-local ($datos);
+my  ($file) = @_;
+my ($datos);
 
   if (-f $file)
   {
@@ -163,8 +174,8 @@ local ($datos);
   }
   else
   {
-    $e = $!;
-    $error = "Error opening $file: $e";
+    my $e = $!;
+    my $error = "Error opening $file: $e";
     syslog ("err", $error);
     return ("-1");
   }

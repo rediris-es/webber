@@ -180,7 +180,6 @@ else {
          &ReadTemplatesRec($cwd);
  	if ($pag =~ /$var{wbbFileNameRegExp}/ && $pag ne $var{wbbTemplateName}) {
 	    debug (1, "Debug:(Webber Main) go for file: $page\n") ;
-	    debug (1, "wbbTargetRoot is $var{'wbbTargetRoot'}" );
             &process($pag );
          }
          else { debug (1,"Debug:(Webber Main) Skip file $cwd/$pag\n"); }
@@ -356,91 +355,19 @@ sub process {
    my ($page, $global) = @_;
 
    push_var ;
-   my (@tempo, $package, $sname);
    @INC = @lib::ORIG_INC;
    unshift @INC, @wbbProcLib;
 
+
+#----
    $var{"wbbSource"} = $page;
-   $var{'wbbOut'} ="";
-   debug 2, "Process: file= $var{'wbbSource'} \n" ;   
-   debug 2, "wbbTargetRoot is $var{'wbbTargetRoot'}\n" ;
-   my ($name, $lang);
-   if (! ((defined $var{'wbbInteractive'}) && ( $var{'wbbInteractive'}  eq "1")  )) {
-      if ($page =~ /$var{wbbFileNameRegExp}/) { $name = $1; }
-      else { $name = $page; }
-      
-     $var{"wbbTarget"} = $name;
-	  $var{"wbbTargetName"} = $var{"wbbTarget"}.$var{"wbbExtension"};
-      $var{"wbbTarget"} =~ s/\.$lang$// if ($lang ne "");
-   }
-
-   $var{"wbbIn"}="" if !exists $var{"wbbIn"};
-    
-   ((-f "$page") ||  (defined $var{'wbbInteractive'} && ( $var{'wbbInteractive'}  eq "1") )) || die "No such page $page.\n";
-   my (@stats) = stat _;
-
-  ## Y esto es lo que se quita (ahora sería File::ReadVars &readVars ($page, "source file", \%var) unless (defined $var{'wbbInteractive'} && ( $var{'wbbInteractive'}  eq "1")) ;
-
-   my $target ;
-   if ($var{'wbbTargetRoot'} =~ /absolutePath:\s*(.*)/) {
-	$target =$1 ; 
-	debug 1, "absolutepath targetroot =$var{'wbbTargetRoot'}" ;		
-	}
-   else {
-	 $target = getcwd();
-	 $var{'wbbSourceRoot'} = NormalizePath ($var{'wbbSourceRoot'} ) ;
-	 $var{'wbbTargetRoot'} = NormalizePath ($var{'wbbTargetRoot'}) ;
-	my $base= s/$var{'wbbSourceRoot'}// ;
-	if ($target =~ /.*$var{'wbbSourceRoot'}.*/ ) {
-         		$target =~ s/^$var{'wbbSourceRoot'}/$var{'wbbTargetRoot'}/;
-			}
-	else {
-	        debug 0, "NOTICE: Webbering file outside wbbSourcePath, Setting target to: root wbTargetRoot" ;
- 		my @temp = split /\//, $target ;
-		my $target = $base  . "/" . pop @temp ; 
-		debug 1, " target is $target" ;
-	}
-	}
+   debug 2, "process: file= $var{'wbbSource'} \n" ;   
+  # debug 2, "wbbTargetRoot (Obsolete s $var{'wbbTargetRoot'}\n" ;
    
-  
-   if  (($var{'wbbMakedir'} == 1  ) and  (not -d $target))
-   {
-    debug (1,"creating path $target") ;
-     mkpath ( untaint("$target") ,0,0755) ;
-   }
-	else{ debug 1, " no se cumple condicion $var{'wbbMakedir'}  $opt{m}" ;}
-
-  if (not -d $target ) { 		debug 0,  " ojo con -d target $target"; }
-
-   $target .= "/$name$var{wbbExtension}";
-    
-   if (($var{'wbbForceupdate'} ==0 )and (my $targetdate = (stat "$target")[9] )) {
-      if ($stats[9]<=$targetdate) {
-         print STDERR "$target is more recent than $page. Skipping\n";
-         return;
-      }
-   }
- 
-   if  (( defined $var{'wbbInteractive'}) && ( $var{'wbbInteractive'}  eq "1") ) {
-#      chmod 0644, untaint ("$target");
-#      unlink (untaint ("$target"));
-	 }
-
-	else {
-       
-      debug (1,"Debug:(process) Target File is " . untaint ($target . $var{'wbbexttmp'}) ) ;
-
-	$var{'wbbActualFile'} = $var{'wbbSource'} ;	
-  	$var{'wbbTarget'} =  untaint ($target ) ;  # NOTA Seguramente esto debería ser "depraced" 
-	$var{'wbbTargetRelative'} = $var{'wbbTarget'} ;
-	$var{'wbbTargetRelative'} =~ s/$var{'wbbTargetRoot'}// ;
-
-   }
-	
-   unshift @INC, (getcwd(), split /\s/, $var{'wbbProcs'});
+   
 
 ## Nota: Esto es todo lo de antes, se supone que teniendo 
-## Wbbrun = File::ReadVars wbbPre wbbProc wbbPost File::WriteVars se debería 
+## Wbbrun = File::SetTarget File::ReadVars wbbPre wbbProc wbbPost File::WriteVars se debería 
 ## tener lo mismo que ahora.
 
  runprocs ("wbbRun") ;
