@@ -19,14 +19,18 @@ use strict ;
 #-------------------------------------------------------------------------
 sub debug {
         my @lines = @_ ;
+# Por el tema de strict 
+	no strict "subs" ;
         if (defined (&wbbdebug)) { wbbdebug (@lines) ; }
         elsif (defined main::debug) { main::debug (@lines) ; }
-        else {
+       else {
           my $level = shift @lines ;
         my $line= join '', @lines ;
         chomp $line ;
         print STDERR "$line\n" ;
         }
+use strict "subs" ;
+# Joder mierda del strict 
 }
 # End Funcion debug
 
@@ -80,6 +84,90 @@ File::ReadVars uses the following Webber variable:
 FINAL
 }
 
+sub SetTarget {
+
+
+	my $refvar=$_[0] ; ; 
+
+
+#----
+   debug 2, "Setting de target,  file= $$refvar{'wbbSource'} \n" ;   
+   debug 2, "wbbTargetRoot is $$refvar{'wbbTargetRoot'}\n" ;
+   
+   my ($name, $lang);
+   if (! ((defined $$refvar{'wbbInteractive'}) && ( $$refvar{'wbbInteractive'}  eq "1")  )) {
+      if ($$refvar{'wbbSource'} =~ /$$refvar{'wbbFileNameRegExp' }/) { $name = $1; }
+      else { $name = $$refvar{'wbbSource'}; }
+      
+      $$refvar{"wbbTargetName"} = $$refvar{"wbbTarget"}.$$refvar{"wbbExtension"};
+ # Esto nunca se produce     $$refvar{"wbbTarget"} =~ s/\.$lang$// if ($lang ne "");
+   }
+
+   $$refvar{"wbbIn"}="" if !exists $$refvar{"wbbIn"};
+    
+   ((-f "$$refvar{'wbbSource'}") ||  (defined $$refvar{'wbbInteractive'} && ( $$refvar{'wbbInteractive'}  eq "1") )) || die "No such page $$refvar{'wbbSource'}.\n";
+
+   my (@stats) = stat ($$refvar{'wbbSource'}) ;
+
+  ## Y esto es lo que se quita (ahora sería File::ReadVars &readVars ($page, "source file", \%var) unless (defined $var{'wbbInteractive'} && ( $var{'wbbInteractive'}  eq "1")) ;
+
+   my $target ;
+   if ($$refvar{'wbbTargetRoot'} =~ /absolutePath:\s*(.*)/) {
+	$target =$1 ; 
+	debug 1, "absolutepath targetroot =$$refvar{'wbbTargetRoot'}" ;		
+	}
+   else {
+	 $target = getcwd();
+	 $$refvar{'wbbSourceRoot'} = NormalizePath ($$refvar{'wbbSourceRoot'} ) ;
+	 $$refvar{'wbbTargetRoot'} = NormalizePath ($$refvar{'wbbTargetRoot'}) ;
+	my $base= s/$$refvar{'wbbSourceRoot'}// ;
+	if ($target =~ /.*$$refvar{'wbbSourceRoot'}.*/ ) {
+         		$target =~ s/^$$refvar{'wbbSourceRoot'}/$$refvar{'wbbTargetRoot'}/;
+			}
+	else {
+	        debug 0, "NOTICE: Webbering file outside wbbSourcePath, Setting target to: root wbTargetRoot" ;
+ 		my @temp = split /\//, $target ;
+		my $target = $base  . "/" . pop @temp ; 
+		debug 1, " target is $target" ;
+	}
+	}
+   
+  
+   if  (($$refvar{'wbbMakedir'} == 1  ) and  (not -d $target))
+   {
+    debug (1,"creating path $target") ;
+     mkpath ( untaint("$target") ,0,0755) ;
+   }
+	else{ debug 1, " no se cumple condicion  Path don't exists and wbbMakedir= $$refvar{'wbbMakedir'} " ;}
+
+  if (not -d $target ) { 		debug 0,  " ojo con -d target $target"; }
+
+   $target .= "/$name$$refvar{'wbbExtension'}";
+    
+   if (($$refvar{'wbbForceupdate'} ==0 )and (my $targetdate = (stat "$target")[9] )) {
+      if ($stats[9]<=$targetdate) {
+         print STDERR "$target is more recent than $$refvar{'wbbSource'}. Skipping\n";
+         return;
+      }
+   }
+ 
+   if  (( defined $$refvar{'wbbInteractive'}) && ( $$refvar{'wbbInteractive'}  eq "1") ) {
+#      chmod 0644, untaint ("$target");
+#      unlink (untaint ("$target"));
+	 }
+
+	else {
+       
+      debug (1,"Debug:(process) Target File is " . untaint ($target . $$refvar{'wbbexttmp'}) ) ;
+
+	$$refvar{'wbbActualFile'} = $$refvar{'wbbSource'} ;	
+  	$$refvar{'wbbTarget'} =  untaint ($target ) ;  # NOTA Seguramente esto debería ser "depraced" 
+	$$refvar{'wbbTargetRelative'} = $$refvar{'wbbTarget'} ;
+	$$refvar{'wbbTargetRelative'} =~ s/$$refvar{'wbbTargetRoot'}// ;
+
+   }
+	
+}
 sub WriteVar  
 {
 
@@ -90,8 +178,8 @@ sub WriteVar
    debug (3, "Output file is $$refvar{'wbbTarget'} and output content is defined in variable $outvar\n" );	
  
   open  FILE  , ">" . untaint($$refvar{'wbbTarget'} . $$refvar{'wbbexttmp'} ) || die "Can't write to $$refvar{'wbbtarget'}.$$refvar{'wbbexttmp'}\n" ;
-    print FILE "XXX" ;
     print FILE   $$refvar{$outvar}  ;
+    debug 5, "Content of $outvar is $$refvar{'$outvar'} " ;
     debug (2, "$outvar  written in $$refvar{'wbbTarget'}$$refvar{'wbbexttmp'} " ) ;
    close (FILE);
 # Now the move
@@ -182,6 +270,22 @@ sub EvaluateVar  {
   
         return $lin ;
         }
+
+
+#----------------------------------------------------------------------
+# Function: NormalizePath
+#----------------------------------------------------------------------
+sub NormalizePath {
+  my $wPath = shift;
+  
+  # Por si alguien pone 
+  # /Volumes/////repositorio/WWW2/www.rediris.es//src/
+  $wPath =~ s/\/\/+/\//g ;
+  # Eliminamos la última barra "/"
+  $wPath =~ s/\/$//g;
+
+  return $wPath;
+}
 
 
 
