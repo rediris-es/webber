@@ -17,6 +17,6 @@
 # Extension de las paginas
 #wbbExtension = .html
 ##wbbDebugFile= $var(wbbRoot)/debug.txt
-#wbbDebugFile = /var/log/webber/debug.txt
+#wbbDebugFile = ./debug.txt
 #wbbDebug = 10 
 #wbbPre = FileLang::filelang 

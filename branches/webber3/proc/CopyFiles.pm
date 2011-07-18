@@ -210,7 +210,7 @@ sub copyfiles  {
 	debug (2, " CGI mode don't do anything") ;
 	}
 else {
- print STDERR "procesing $$var{'wbbSource'}\n"  ;º
+ print STDERR "procesing $$var{'wbbSource'}\n"  ;
  $wbbDebug = $$var{'wbbDebug'} ;
  $wbbSourceRoot= $$var{'wbbSourceRoot'} ;
  $wbbTargetRoot= $$var{'wbbTargetRoot'} ;

@@ -204,16 +204,16 @@ sub filelang {
 		$lang= $$rv{'language.default'} ; 
 		my @dirs =   split  /\//, $$rv{'wbbActualfile'}  ;
 		$file = pop (@dirs) ;
-		#print STDERR "before regex file=$file\n" ;
+		debug (5, "before regex file=$file\n") ;
 		$file =~ /$$rv{'wbbFileNameRegExp'}/ ; 
 		$file = $1 ;
-		#print STDERR "After regex file=$file pangpattern=$$rv{'language.detectpattern'}\n" ;
+		debug (4, "After regex file=$file langpattern=$$rv{'language.detectpattern'}\n");
 	
 		if ($file =~ /$$rv{'language.detectpattern'}/) {
 			$name=$1 ;
 			$$rv{'languaje.name'} =$1 ; 
 			$lang=$2 ;
-			#print STDERR "detectado lenguaje = $lang name=$name, pattern = $$rv{'language.detectpattern'} values $1, $2\n" ;
+		debug (4,"detectado lenguaje = $lang name=$name, pattern = $$rv{'language.detectpattern'} values $1, $2\n") ;
 		}
 		else {$name=$file ; }
 		
@@ -223,7 +223,8 @@ sub filelang {
 	
 		#Changing the name ?
 		if (( $$rv{'language.changename'} eq "1") || ( $$rv{'language.changename'} eq "yes") ){
-		#print STDERR  "Want to change the NAME = 1, name =$name, lang=$$rv{'wbbLang'} ($lang), pattern= $$rv{'language.writepattern'}\n" ; 
+		debug (4,"Want to change the NAME = 1, name =$name, lang=$$rv{'wbbLang'} ($lang), pattern= $$rv{'language.writepattern'}\n") ; 
+
 		my @dirs =  split  /\//, $$rv{'wbbTarget'}  ;
 		pop (@dirs) ;
 		my $newname=   $$rv{'language.writepattern'} ;
@@ -242,7 +243,7 @@ sub filelang {
 		
 	}
   	debug (1, "FileLang end,   filename= $$rv{'wbbActualfile'}") ;
-        debug (1, "FileLang end  target = $$rv{'wbbTarget'}}") ;
+        debug (1, "FileLang end  target = $$rv{'wbbTarget'}") ;
 	        #print STDERR "FileLang, salimos aqui src= $$rv{'wbbActualfile'} dst=$$rv{'wbbTarget'} \n " ;
 }
 
