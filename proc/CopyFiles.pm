@@ -16,28 +16,41 @@ use File::Find;
 use File::Spec;
 require HTML::LinkExtor;
 use POSIX ;
-#use strict ;
+use strict ;
 
 
+#DEBUG-INSERT-START
 
 #-------------------------------------------------------------------------
-# Function: debug 
+# Function: debug
+# Version 2.0
+# Permite el "debug por niveles independientes"
+ 
 #-------------------------------------------------------------------------
 sub debug {
         my @lines = @_ ;
-#        my $level = shift @lines ;
-        if (defined (&wbbdebug)) { wbbdebug ( @lines) ; }
-        elsif (defined main::debug) { main::debug (@lines) ; }
-        else {
-         my $level = shift @lines ;
+# Por el tema de strict 
+        no strict "subs" ;
+	my $level = $lines[0] ;
+	unshift @lines , $name;
+        if (defined main::debug_print) { main::debug_print (@lines) ; }
+       else {
+          my $level = shift @lines ;
         my $line= join '', @lines ;
         chomp $line ;
-        print STDERR "$line\n" ;
+        print STDERR "$name: $line\n" ;
         }
-        }# End Funcion debug
-
-
+use strict "subs" ;
+# Joder mierda del strict 
+}
 # End Funcion debug
+
+
+
+#DEBUG-INSERT-END
+
+
+
 
 
 my ($wbbDebug, $wbbSourceRoot, $wbbTargetRoot) ;

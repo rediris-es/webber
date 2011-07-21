@@ -5,25 +5,49 @@
 
 package BodyFaq ;
 
+use strict ;
+
+
+
+my $name=       "BodyFaq";
+my $version=    "0.7";
+
+"B
+
+#DEBUG-INSERT-START
+
 #-------------------------------------------------------------------------
-# Function: debug 
+# Function: debug
+# Version 2.0
+# Permite el "debug por niveles independientes"
+ 
 #-------------------------------------------------------------------------
 sub debug {
         my @lines = @_ ;
-        if (defined (&wbbdebug)) { wbbdebug (@lines) ; }
-        elsif (defined main::debug) { main::debug (@lines) ; }
-        else {
-	  my $level = shift @lines ;
+# Por el tema de strict 
+        no strict "subs" ;
+	my $level = $lines[0] ;
+	unshift @lines , $name;
+        if (defined main::debug_print) { main::debug_print (@lines) ; }
+       else {
+          my $level = shift @lines ;
         my $line= join '', @lines ;
         chomp $line ;
-        print STDERR "$line\n" ;
+        print STDERR "$name: $line\n" ;
         }
+use strict "subs" ;
+# Joder mierda del strict 
 }
 # End Funcion debug
 
 
-my $name=	"BodyFaq";
-my $version=	"0.7";
+
+#DEBUG-INSERT-END
+
+
+
+
+
 
 my %def = (
 	'bodyfaq.pretoc' => "<h1><center>Indice de Contenidos</center></h1><hr><p><ul>" ,
@@ -92,7 +116,7 @@ sub incr {
 	my $level =$_[0] ;
 	my $poss = $_[1] ;
 	$poss ++ ;
-	print ("incr called with $level, $poss \n") if $debug;
+	debug (1, "incr called with $level, $poss \n") ;
 	my $return ="" ;
 	$level="0" if ($level eq "") ;
 	my @codes= split /\./, $level ;
@@ -126,7 +150,7 @@ sub bodyfaq
    my $var =  $_[0] ;
    debug (1, "BodyFaq::bodyfaq se ejecuta") ;
 
-   my ($pretoc,$postoc,$tocsty, $entrys, $sep,$i, @array,$level,$value,@toc ) ;
+   my ($pretoc,$postoc,$tocsty, $entrys, $sep,$i, @array,$level,$value,@toc , $place) ;
    my ($salida) ;
    $salida = "<!-- Webber proc $name v$version -->\n";
    debug( 1, "OK Going to play !!!\n");
@@ -144,6 +168,8 @@ sub bodyfaq
 	debug (3,"bodyfaq.entrys= $entrys" ) ;
 	debug (3,"bodyfaq.sep= $sep") ;
 	debug (3,"bodyfaq.place=$place") ;
+
+    my $label ;
 		
     $level=1 ;
     $label="0" ;
@@ -151,6 +177,7 @@ sub bodyfaq
     @toc=() ;
     @array=split /\n/, $$var{$place} ;
 
+    my @lines ;
     for ($i=0 ; $i!=@array ; $i++) {
     	if ($array[$i] =~ /^\s*$sep([0-9]*):(.*)/ ) {
 #	if ($array[$i] =~ /^TIT/ ) {
@@ -162,26 +189,26 @@ sub bodyfaq
 			$level=0 ;
 			debug (5,  "DEBUG: A cero mark !!!\n")  ;
 			}
-		$print = $array[$i] ;
-		$code=$2 ;
+		#$print = $array[$i] ;
+		my $code=$2 ;
 		$label=incr($label,$level) ;
 		debug (3, "DEBUG: change to $label\n") ;
 
 		# OK Let's to compose the toc entry
-		$tentry=$tocsty ;
+		my $tentry=$tocsty ;
 		$tentry=~ s/VALUE/$label/g ;
 		$tentry=~ s/CODE/$code/ ;
 		push @toc, $tentry ;
 		debug ( 3,  "DEBUG: pushed $tentry") ;
 		# and the line
-		$line =$entrys ;
+		my $line =$entrys ;
 		$line =~ s/VALUE/$label/g ;
 		$line =~ s/CODE/$code/ ;
 		push @lines,$line ;
 		debug( 5, "DEBUG: pushed $line \n") ;
 		}
 		
-       else { print "DEBUG Not found $sep in $array[$i] \n" if $debug ;
+       else { debug (1,  "DEBUG Not found $sep in $array[$i] \n" ) ;
 		push @lines, $array[$i] ; }
 	}
 

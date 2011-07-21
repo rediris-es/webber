@@ -10,27 +10,46 @@ require HTML::LinkExtor;
 use POSIX ;
 use strict ;
 no strict "subs" ;
-	
+
+
+my $name=       "FileLang";
+my $version=    "1.2";
+
+#DEBUG-INSERT-START
+
 #-------------------------------------------------------------------------
-# Function: debug 
+# Function: debug
+# Version 2.0
+# Permite el "debug por niveles independientes"
+ 
 #-------------------------------------------------------------------------
 sub debug {
         my @lines = @_ ;
-        if (defined (&wbbdebug)) { wbbdebug (@lines) ; }
-        elsif (defined main::debug) { main::debug (@lines) ; }
-        else {
+# Por el tema de strict 
+        no strict "subs" ;
+	my $level = $lines[0] ;
+	unshift @lines , $name;
+        if (defined main::debug_print) { main::debug_print (@lines) ; }
+       else {
           my $level = shift @lines ;
         my $line= join '', @lines ;
         chomp $line ;
-        print STDERR "$line\n" ;
+        print STDERR "$name: $line\n" ;
         }
+use strict "subs" ;
+# Joder mierda del strict 
 }
 # End Funcion debug
 
 
 
-my $name=	"FileLang";
-my $version=	"1.2";
+#DEBUG-INSERT-END
+
+
+
+
+
+
 
 ## No gusta pero lo veo más comodo que cargar uno por defecto y como es largo lo defino aqui, y lo
 # meto despues en el defs.
