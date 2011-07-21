@@ -37,7 +37,7 @@ our (%var, %wbbDef, @environment ) ;
 
 
 ### OK
-## declaración anticipada de algunas funciones
+## declaraciÃ³n anticipada de algunas funciones
 sub debug; 	# Impresion de mensajes de depuracion
 sub push_var;	# Se va a tener un entorno (%var) comun, y 
 		# una pila de entornos, esto apila un entorno
@@ -340,6 +340,7 @@ sub runprocs {
          	&$thisp( \%var );
          	debug (1, "\n" ) ;
 	}
+
 	else {
 		debug (1,"[$proclist] Found another Var , $thisp ..") ;
 		runprocs ($thisp) ;
@@ -367,7 +368,7 @@ sub process {
    
 
 ## Nota: Esto es todo lo de antes, se supone que teniendo 
-## Wbbrun = File::SetTarget File::ReadVars wbbPre wbbProc wbbPost File::WriteVars se debería 
+## Wbbrun = File::SetTarget File::ReadVars wbbPre wbbProc wbbPost File::WriteVars se deberÃ­a 
 ## tener lo mismo que ahora.
 
  runprocs ("wbbRun") ;
@@ -464,7 +465,7 @@ sub NormalizePath {
   # Por si alguien pone 
   # /Volumes/////repositorio/WWW2/www.rediris.es//src/
   $wPath =~ s/\/\/+/\//g ;
-  # Eliminamos la última barra "/"
+  # Eliminamos la Ãºltima barra "/"
   $wPath =~ s/\/$//g;
 
   return $wPath;
@@ -502,25 +503,34 @@ sub EvaluateVar  {
 #-------------------------------------------------------------------------
 sub debug {
 	my @lines = @_ ;
-	my $level = shift @lines ;
-	if ($level <= $var{'wbbDebug'} ) {
-	my $line= join '', @lines ;
-	chomp $line ;
-	if ( defined ($var{'wbbDebugFile'}) && $var{'wbbDebugFile'} !~/stderr/i)   {
-		open FILE, ">>$var{'wbbDebugFile'}" ;
-		print FILE "$line\n" ;
-		close FILE ;
-	}
-	else {
-	print STDERR "wbbDebugFile no existe\n" ;
-	print STDERR "$line\n"  if  defined $var{'wbbDebug'} ;
-	}
+	# @lines[0] es el nivel
+	if ($lines[0] <= $var{'wbbDebug'} ) {
+	debug_print ($name, @lines ) ; 	
 	}
 }
 # Auxiliar de debug
 sub wbbdebug {
 	debug (@_) ;
 	 }
+
+# Auxiliar de debug de verdad (hace el trabajo
+sub debug_print{ 
+	my @lines =@_ ;
+	my $name= shift @lines ;
+	my $level=shift @lines ;
+	my $line= "[$name]<$level> :" .  join '', @lines ;
+	chomp $line ;
+	if ( defined ($var{'wbbDebugFile'}) &&  ($var{'wbbDebugFile'} !~/stderr/i))   {
+		open FILE, ">>$var{'wbbDebugFile'}" ;
+		print FILE "$line\n" ;
+		close FILE ;
+	}
+	else {
+	$line =" (wbbDebugFile undeffined) " . $line ;
+	print STDERR "$line\n"  if  defined $var{'wbbDebug'} ;
+	}
+}
+	
 #--------------------------------------------------------------------------
 # Function: push_var
 # -------------------------------------------------------------------------
