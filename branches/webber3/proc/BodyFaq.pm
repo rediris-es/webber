@@ -12,7 +12,6 @@ use strict ;
 my $name=       "BodyFaq";
 my $version=    "0.7";
 
-"B
 
 #DEBUG-INSERT-START
 
