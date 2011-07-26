@@ -40,13 +40,16 @@ use strict "subs" ;
 #DEBUG-INSERT-END
 
 
-
-
-
 # defaults
 my $defpgpsign= "/usr/bin/gpg -sat" ;
 my $wbbsrc = "wbbOut" ;
 my $wbbdst = "wbbOut" ;
+my $msg="This page has been <a href=\"http://wwww.rediris.es/pgp/firmaweb\"> PGP signed </a>" ;
+my $msgvar="pgpsign" ;
+
+my $expVAR1= '<var name\s*\=\s*\"';
+my $expVAR2= '\"\s*\/>';
+
 
 my ($pgp, $file, $i,$mensaje) ;
 sub info
@@ -80,6 +83,10 @@ $name uses the following variables:
    		      usually wbbIn or wbbOut
    #pgpsign.dstvar : Webber variable that will have the output,
    		      (default $wbbdst) usually wbbOut
+   #pgpsign.msg : Message to be place in the page (#pgpsign.msgvar) 
+			stating that the page has been signed.
+   #pgpsign.msgvar : Variable in pgpsign.srcvar that will contain the
+			message about the signing of the web page.
 FINAL
 
 }
@@ -93,6 +100,11 @@ sub PgpSign {
    if (exists $$var{'pgpsign.srcvar'}) { $wbbsrc= $$var{'pgpsign.srcvar'} ; }
    if (exists $$var{'pgpsign.dstvar'}) { $wbbdst= $$var{'pgpsign.dstvar'} ; }
 
+   if (exists $$var{'pgpsign.msg'}) {$msg =$$var{'pgpsign.msg'} ; } 
+
+   if (exists $$var{'pgpsign.msgvar'}) { $msgvar = $$var{'pgpsign.msgvar'} ; }
+
+
     debug 3,  "PgpSign::pgpsign execution" ;
 #
 # cut &paste
@@ -105,23 +117,24 @@ $i= $INPUT_RECORD_SEPARATOR ;
 undef $INPUT_RECORD_SEPARATOR;
 
 $mensaje= $$var{$wbbsrc} ;
+
+my $rex = $expVAR1.$msgvar.$expVAR2;
+ 
+$mensaje =~ s/$rex/$$var{$msgvar}/g;
+
 open (SALIDA, ">$file") ;
-print SALIDA "\n\n-->\n" ;
 print SALIDA  $mensaje ;
-print SALIDA "\n<!--WRAPPER TO PGP SIGN THIS PAGE\n\n" ;
 close SALIDA ;
 $mes ="" ;
 open PGP , "$pgp < $file|" ;
-$mes .= "<!-- Webber proc $name v$version -->\n" ;
 $mes .= "<!-- PAGE SIGNED WITH PGP\n" ;
 $mes .= scalar (<PGP>) ;
 $mes .=  "\n (c) 2000 RedIRIS -->\n" ;
-
 close PGP ;
 debug 3, "execution was $pgp < $file" ;
 unlink $file ;
 $$var{$wbbdst} =  $mes ;
-debug 3, "message placed in $wbbdst was\n....\n$mes\....\n" ; 
+	debug 3, "message placed in $wbbdst was\n....\n$mes\....\n" ; 
 
  $INPUT_RECORD_SEPARATOR = $i; 
 }
