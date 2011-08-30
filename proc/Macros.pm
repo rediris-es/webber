@@ -6,12 +6,14 @@
 # New version of the Macros Module
 package Macros;
 
-$name ="Macros" ;
-$version= "0.2" ;
 
 #use Tie::File::AsHash; 
 use DB_File ;
- use HTML::Entities;
+use HTML::Entities;
+use strict ;
+
+my $name ="Macros" ;
+my $version= "0.2" ;
 
 my %defs = (
 	'macros.place' 			=> 'wbbIn' ,
@@ -141,7 +143,7 @@ the webbered pages, it's deffined as follow:
 #index.name.value = value to add
 
 Note: For key and value , you can use any text or the
-value of a webber variable (for example $var(Page))
+value of a webber variable (for example \$var(Page))
 
 
 For example , assuming that all the webber pages contains an
@@ -150,8 +152,8 @@ each page .
 
 #index.name= owner
 #index.owner.type= simple
-#index.owner.file = $env(REPOSITORIO/WWW/aux/index.owner.idx)
-#index.owner.key = $var(urlpage)
+#index.owner.file = \$env(REPOSITORIO/WWW/aux/index.owner.idx)
+#index.owner.key = \$var(urlpage)
 #index.ownervalue = owner
 
  If we want to have an index listing the owner of the pages
@@ -325,7 +327,7 @@ my $text=<<END;
     <TABLE BORDER="0" 
            CELLPADDING="10" CELLSPACING="1" WIDTH="100%">
 END
-		while ($file =readdir (DIR) ) {
+		while (my $file =readdir (DIR) ) {
 			next unless $file =~ /$regex/  ;
 			next if ($file eq "." ) ;
 			next if ($file eq ".." ) ;
@@ -343,7 +345,8 @@ $text .=<<END;
 </TR>
 </TABLE>
 END
-	$lin= $pre. $text , $post ;
+#	$lin= $pre. $text , $post ;
+	$lin = $text ;
 }	
 	return $lin ;
 }
@@ -366,7 +369,7 @@ sub indexdir  {
 
 	my @varsto_paint=split /:/, $varpaint ;
 	my $varindex = shift (@varsto_paint) ;
-	debug (1, "processing indexdir macros.indexdir.dir =  $$var{'macros.indexdir.dir'}  def=  $$defs{'macros.indexdir.dir'}  directive now") ;
+	debug (1, "processing indexdir macros.indexdir.dir =  $$var{'macros.indexdir.dir'}  def=  $defs{'macros.indexdir.dir'}  directive now") ;
 #	print STDERR "vars content =$vars\n" ;
 #	print STDERR "key index= $varindex , other vars are : " . join "," , (@varsto_paint)  ."\n" ; 
 	my $txt ="" ;
@@ -400,7 +403,7 @@ sub indexdir  {
 			#  print STDERR "PACOBUG: valor = $varsto_paint[0] , value = $hash_temporal{$varsto_paint[0]}\n" ;
 			  for (my $i =0 ; $i!=@varsto_paint ; $i ++ ) {
 					$description .=  $sep  .  $hash_temporal{$varsto_paint[$i]} ;
-					if ($i < (@varsto_print ) -1 ) { $description .= $sep ; }
+					if ($i < (@varsto_paint ) -1 ) { $description .= $sep ; }
 			  }
 			 # print STDERR "description created = $description\n" ;
 		#	 debug (1, "vartocheck = $vartocheck value= $hash_temporal{$vartocheck} valuetocheck=$value") ;
@@ -442,7 +445,7 @@ sub indexdir  {
 
 sub macro {
         my $lin="" ;
-        my $var = $_[0];
+        my  $var = $_[0];
         my $place =  defined ($$var{'macros.place'}) ? $$var{'macros.place'} : $defs{'macros.place'} ;
 	my %desc ;
 	my @array ;
@@ -484,7 +487,7 @@ sub macro {
                 }
 		elsif ($lin =~ /(.*)#execute\((.*)\)(.*)/) { # Execute a set of webber processors 
 			if ($lin =~ /\\#execute/)  { next ; }
-			$lin = $1 . execute ($2) . $3 ; 
+			$lin = $1 . execute ($2,$var) . $3 ; 
 		}
 		$array[$j] =$lin . "\n"  ;
 	}
@@ -494,15 +497,16 @@ sub macro {
 
 sub execute {
 	my $proc=shift ;
+	my $var=shift ;
     my $thisp ;
    if ($proc ne "") {
-       my @tempo = split /\s+/, $pre;
+       my @tempo = split /\s+/, $proc ;
       foreach $thisp (@tempo) {
          next unless $thisp =~ /\w+/ ;
          debug (1," Executing webber Processor  $thisp inside Macros.pm ..." ) ;
-         ($package, $sname) = split /::/,$thisp;
+         my ($package, $sname) = split /::/,$thisp;
          require $package .".pm" ;
-         &$thisp( \%var );
+         &$thisp( $var );
       }
    }
    return "" ;
