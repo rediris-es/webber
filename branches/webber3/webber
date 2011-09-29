@@ -153,6 +153,8 @@ if ($opt{i} eq "1") {
     &process("") ;
 }
 else {
+    
+    runprocs ("wbbRunBefore") ;
    while (my $page = shift(@ARGV)) {
       my $currentdir = getcwd();
       if (-d $page) {
@@ -187,6 +189,7 @@ else {
       }
       else { die "Directory or file: $page does not exist"; }
    }
+    runprocs ("wbbRunAfter") ;
 }
 
 #----------------------------------------------------------------------
