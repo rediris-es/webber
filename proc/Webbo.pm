@@ -97,6 +97,9 @@ $name uses the following Webber variables:
  #webbo.dst: Defines the destination of $name processing. If no destination is
              specified, #wbbOut (equivalent to "#webbo.dst = wbbOut") is used.
 
+ #webbo.regex.pre: The start of the regular expresion (defaults to: $expVAR1 )
+ #webbo.regex.post: The end  of the regular expresion (defaults to: $expVAR2 )
+
  Any other:  Any other variable referred in a <var /> tag, subsituting the
              tag for the variable value in #wbbOut.
 
@@ -117,6 +120,16 @@ sub webbo
     debug  (1, "Webbo::webbo se ejecuta") ;
     debug  (1, "webbo.src = $$var{'webbo.src'}") ;
     debug  (1, "webbo.dst = $$var{'webbo.dst'}\n") ;
+
+    if (exists ($$var{'webbo.regex.pre'} )) { $expVAR1=$$var{'webbo.regex.pre'} ; }
+    if (exists ($$var{'webbo.regex.post'} )) { $expVAR2=$$var{'webbo.regex.pre'} ; }
+	
+    $expVAR= $expVAR1 . "(*)" . $expVAR2 ;
+
+	debug (2, "webbo.regex.pre = $expVAR1" ) ;
+	debug (2, "webbo.regex.post= $expVAR2" ) ;
+	debug (2, "Regex= $expVAR") ;
+
    my ($webboSrc , $webboDst) ;
 
 if (exists $$var{"webbo.src"}) 
