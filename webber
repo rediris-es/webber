@@ -58,16 +58,17 @@ my @wbbProcLib = ();
 
 
 my $name="Webber";
-my $version="3.0 beta" ;
+my $version="3.0 RC beta epsilon" ;
 my $copyright="Copyright 1996-2011, RedIRIS";
 
 # Variables de las opciones
-my ($opt_help, $opt_C, $opt_f, $opt_hproc, $opt_i, $opt_lp, $opt_r, $opt_t, $opt_nodir , $opt_v , $opt_debug, $opt_s) ;
+my ($opt_help, $opt_C, $opt_f, $opt_hproc, $opt_i, $opt_lp, $opt_r, $opt_t, $opt_nodir , $opt_lazy, $opt_v , $opt_debug, $opt_s) ;
 # valores por defecto 
 $opt_debug = 0 ;
 $opt_i =0 ;
 $opt_t="" ;
-#$opt_s = [] ;
+$opt_s = [] ;
+$opt_lazy = [] ;
 
 GetOptions (
 	"help|ayuda|h|?" => \$opt_help ,
@@ -81,7 +82,8 @@ GetOptions (
 	"nodir|m" => \$opt_nodir,
 	"version|v" => \$opt_v,
 	"debug|d+" => \$opt_debug ,
-	"set|s=s@" => \$opt_s 
+	"set|s=s@" => \$opt_s ,
+	"lazy-set=s@" => \$opt_lazy
 	) ;
 
 #getopts ("C:dfhmirHIt:v", \%opt );
@@ -158,12 +160,14 @@ debug (3,"Debug:(Webber Main) Calling initvars 1\n" ) ;
 
 &InitVars;
 
+if (@$opt_s >0 ) { 
 debug (3, "Setting vars from commandline\n" ) ;
 for (my $i=0 ; $i!= @$opt_s ; $i++ ) {
 	my ($varcmd,$value) = split /=/, $$opt_s[$i] ; 
 	debug (4, "Setting var $varcmd to $value") ;
 	$wbbDef{$varcmd} = $value ;
 	}
+}
 
 debug(1,"Debug:(Webber Main) webber start ..");
 
@@ -360,7 +364,7 @@ sub runprocs {
 	my $proclist=$_[0] ;
 
    my $thisp ;
-   if ($var{$proclist} ne "") {
+   if ((defined ($var{$proclist} )) && ($var{$proclist} ne "")) {
    my @tempo = split /\s+/, $var{$proclist};
       foreach $thisp (@tempo) {
          next unless $thisp =~ /\w+/ ;
@@ -401,6 +405,16 @@ sub process {
 ## Nota: Esto es todo lo de antes, se supone que teniendo 
 ## Wbbrun = File::SetTarget File::ReadVars wbbPre wbbProc wbbPost File::WriteVars se debería 
 ## tener lo mismo que ahora.
+
+# OK , aquí es donde se procesan los "Lazy" set
+if (@$opt_lazy >0 ) { 
+debug (3, "Setting Lazy vars from commandline\n" ) ;
+for (my $i=0 ; $i!= @$opt_lazy ; $i++ ) {
+	my ($varcmd,$value) = split /=/, $$opt_lazy[$i] ; 
+	debug (4, "Setting var $varcmd to lazy value  $value") ;
+	$var{$varcmd} = $value ;
+	}
+}
 
  runprocs ("wbbRun") ;
 

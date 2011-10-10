@@ -110,6 +110,9 @@ sub SetTarget {
    debug 2, "Setting de target,  file= $$refvar{'wbbSource'} \n" ;   
    debug 2, "wbbTargetRoot is $$refvar{'wbbTargetRoot'}\n" ;
    
+  # No se para que cojones era el wbbTarget, asi que lo pongo a un valor simbolico, ya que despues se camiba
+	$$refvar{'wbbTarget'} = $$refvar{'wbbSource'} unless (defined ($$refvar{'wbbTarget'} ));
+  
    my ($name, $lang);
    if (! ((defined $$refvar{'wbbInteractive'}) && ( $$refvar{'wbbInteractive'}  eq "1")  )) {
       if ($$refvar{'wbbSource'} =~ /$$refvar{'wbbFileNameRegExp' }/) { $name = $1; }
@@ -136,7 +139,9 @@ sub SetTarget {
 	 $target = getcwd();
 	 $$refvar{'wbbSourceRoot'} = NormalizePath ($$refvar{'wbbSourceRoot'} ) ;
 	 $$refvar{'wbbTargetRoot'} = NormalizePath ($$refvar{'wbbTargetRoot'}) ;
-	my $base= s/$$refvar{'wbbSourceRoot'}// ;
+	my $base = $$refvar{'wbbSource'}  ;
+	if (defined ( $$refvar{'wbbSourceRoot'} )) {  $base=~ s/$$refvar{'wbbSourceRoot'}// ;  }
+	else { $base = "" ; } 
 	if ($target =~ /.*$$refvar{'wbbSourceRoot'}.*/ ) {
          		$target =~ s/^$$refvar{'wbbSourceRoot'}/$$refvar{'wbbTargetRoot'}/;
 			}
@@ -195,7 +200,8 @@ sub WriteVar
  
   open  FILE  , ">" . untaint($$refvar{'wbbTarget'} . $$refvar{'wbbexttmp'} ) || die "Can't write to $$refvar{'wbbtarget'}.$$refvar{'wbbexttmp'}\n" ;
     print FILE   $$refvar{$outvar}  ;
-    debug 5, "Content of $outvar is $$refvar{'$outvar'} " ;
+    
+    debug (5, "Content of $outvar is $$refvar{$outvar}") ;
     debug (2, "$outvar  written in $$refvar{'wbbTarget'}$$refvar{'wbbexttmp'} " ) ;
    close (FILE);
 # Now the move
@@ -293,12 +299,14 @@ sub EvaluateVar  {
 #----------------------------------------------------------------------
 sub NormalizePath {
   my $wPath = shift;
-  
+  if ((defined ($wPath)) &&  ($wPath  ne "")) { 
   # Por si alguien pone 
   # /Volumes/////repositorio/WWW2/www.rediris.es//src/
   $wPath =~ s/\/\/+/\//g ;
   # Eliminamos la última barra "/"
   $wPath =~ s/\/$//g;
+  }
+  else { $wPath = "" ; }
 
   return $wPath;
 }
