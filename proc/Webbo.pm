@@ -122,9 +122,9 @@ sub webbo
     debug  (1, "webbo.dst = $$var{'webbo.dst'}\n") ;
 
     if (exists ($$var{'webbo.regex.pre'} )) { $expVAR1=$$var{'webbo.regex.pre'} ; }
-    if (exists ($$var{'webbo.regex.post'} )) { $expVAR2=$$var{'webbo.regex.pre'} ; }
+    if (exists ($$var{'webbo.regex.post'} )) { $expVAR2=$$var{'webbo.regex.post'} ; }
 	
-    $expVAR= $expVAR1 . "(*)" . $expVAR2 ;
+    $expVAR= $expVAR1 . "(\\w+)" . $expVAR2 ;
 
 	debug (2, "webbo.regex.pre = $expVAR1" ) ;
 	debug (2, "webbo.regex.post= $expVAR2" ) ;
@@ -138,6 +138,9 @@ if (exists $$var{"webbo.src"})
   if ($srcClass eq "file") 
   { 
     $webboSrc = &leeDatos($srcName);
+    debug  (3, "Template file read from $srcName" );
+     
+     debug (5, "valor de webboSrc :\n ", $webboSrc) ;
     $webboSrc = "" if ($webboSrc eq "-1");
   }
   elsif ($srcClass eq "var") 
@@ -173,7 +176,7 @@ $webboDst = $$var{"webbo.dst"} if exists $$var{"webbo.dst"};
         if ($k ne $webboDst)
         {
            my $rex = $expVAR1.$k.$expVAR2;
-	   #debug (0, "rex= $rex k= $k  valor $$var{$k}" ) ;
+	   debug (5, "rex= $rex k= $k  valor $$var{$k}" ) ;
            $$var{$webboDst} =~ s/$rex/$$var{$k}/g;
         }
      }
