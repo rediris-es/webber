@@ -111,7 +111,7 @@ sub SetTarget {
    debug 2, "wbbTargetRoot is $$refvar{'wbbTargetRoot'}\n" ;
    
   # No se para que cojones era el wbbTarget, asi que lo pongo a un valor simbolico, ya que despues se camiba
-	$$refvar{'wbbTarget'} = $$refvar{'wbbSource'} unless (defined ($$refvar{'wbbTarget'} ));
+	$$refvar{'wbbTarget'} = $$refvar{'wbbSource'} . $$refvar{'wbbExtension'}  unless (defined ($$refvar{'wbbTarget'} ));
   
    my ($name, $lang);
    if (! ((defined $$refvar{'wbbInteractive'}) && ( $$refvar{'wbbInteractive'}  eq "1")  )) {
@@ -168,6 +168,7 @@ sub SetTarget {
    if (($$refvar{'wbbForceupdate'} ==0 )and (my $targetdate = (stat "$target")[9] )) {
       if ($stats[9]<=$targetdate) {
          print STDERR "$target is more recent than $$refvar{'wbbSource'}. Skipping\n";
+	 $$refvar{'wbbEnd'} = "1" ;
          return;
       }
    }
