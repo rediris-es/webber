@@ -372,8 +372,8 @@ sub runprocs {
          	debug (1," [$proclist] Using processor  $thisp ..." ) ;
          	my ($package, $sname) = split /::/,$thisp;
          	require $package .".pm" ;
-         	&$thisp( \%var );
 		if  ( (defined $var{'wbbEnd'})  && ( $var{'wbbEnd'} == 1)) { return ; }
+         	&$thisp( \%var );
          	debug (1, "\n" ) ;
 	}
 
