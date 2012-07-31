@@ -47,6 +47,26 @@ sub set_webber_env {
 	my $value=$_[1] ;
 	$webber_env{$key}= $value ;
 	}
+# Funcion debug print 
+
+sub main::debug_print {
+        my @lines =@_ ;
+        my  $name="Webber:modperl" ;
+        my $level="1" ;
+        $name= shift @lines if (defined $lines[0] )  ;
+        $level=shift @lines if (defined $lines[0] ) ;
+        my $line= "[$name]<$level> :" .  join '', @lines ;
+        chomp $line ;
+        if ( defined ($webber_default{'wbbDebugFile'}) &&  ($webber_default{'wbbDebugFile'} !~/stderr/i))   {
+                open FILE, ">>$webber_default{'wbbDebugFile'}" ;
+                print FILE "$line\n" ;
+                close FILE ;
+        }
+        else {
+        $line =" (wbbDebugFile undefined) " . $line ;
+        print STDERR "$line\n"  if  defined $webber_default{'wbbDebug'} ;
+        }
+}
 #-------------------------------------------------------------------------
 # Function: debug 
 #-------------------------------------------------------------------------
