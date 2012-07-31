@@ -119,7 +119,7 @@ sub webbo
 
     debug  (1, "Webbo::webbo se ejecuta") ;
     debug  (1, "webbo.src = $$var{'webbo.src'}") ;
-    debug  (1, "webbo.dst = $$var{'webbo.dst'}\n") ;
+    debug  (1, "webbo.dst = $$var{'webbo.dst'}\n")  if (defined $$var{'webbo.dst'});
 
     if (exists ($$var{'webbo.regex.pre'} )) { $expVAR1=$$var{'webbo.regex.pre'} ; }
     if (exists ($$var{'webbo.regex.post'} )) { $expVAR2=$$var{'webbo.regex.post'} ; }
