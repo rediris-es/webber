@@ -18,7 +18,8 @@ use Apache2::RequestRec ();
 use APR::Table (); 
   
 use Apache2::Const -compile => qw(OK); 
-use constant BUFF_LEN => 4098; 
+#use constant BUFF_LEN => 4098; 
+use constant BUFF_LEN => 16384; 
 
 
 our    @ISA = qw(Exporter);
@@ -29,7 +30,7 @@ our @EXPORT_OK =  qw(read_webber_conf debug );
 
 no strict 'refs';
 
-my $debugfile="/var/log/webber/debug-web.txt" ;
+my $debugfile="/tmp/debug-webber.txt" ;
 my %webber_env= () ;
 my %webber_default =() ;
 
@@ -51,7 +52,11 @@ sub set_webber_env {
 #-------------------------------------------------------------------------
 sub debug {
         my @lines = @_ ;
-        my $level = shift @lines ;
+	my $level =10 ; 
+	if  (  not (defined $lines[0]) || not ($lines[0] =~ /\d+/)) { # Lineas con error, no se porqueprint STDERR  "ERROR con @lines" ; 
+		}
+	else { $level= shift (@lines) ; }
+
 	my $currentlevel=1000 ;
 	$currentlevel= $webber_default{'wbbDebug'} if ( defined $webber_default{'wbbDebug'} );
         if ($level <= $currentlevel ) {
@@ -62,9 +67,9 @@ sub debug {
          	$file= $webber_default{'wbbDebugFile'} ;
 		}
 
-                open FILE, ">>$file" ;
+                open FILE, ">>$file" || print STDERR "can't write on $file !\n"  ;
          #       print FILE  untaint ($line) . "\n" ;
-#		if(tell(FILE) != -1) { print FILE  ($line) . "\n" ; }
+		 print FILE  ("<$level>" , $line) . "\n" ;
 
                 close FILE ;
         }
@@ -191,11 +196,8 @@ sub EvaluateVar  {
 	debug (3, "Entrada en EvaluateVar con Line= $lin" ) ;
 
         while ($lin =~ /.*\$var\(([\w]+[a-zA-Z0-9_.\-]*)\).*/ ) {
-                if (defined ($$ref{$1})) {
-			$c = $$ref{$1}  ;
-		} else { $c= "" ; }
+                $c = $$ref{$1} ;
                 $lin =~ s/\$var\($1\)/$c/ ;
-		
         }
         while ($lin =~ /.*\$env\(([\w]+[a-zA-Z0-9_.\-]*)\).*/ ) {
                 $c = $webber_env{$1} ;
@@ -225,8 +227,9 @@ sub init_webber_system {
 	%webber_default = () ;
 	read_webber_file ($file, \%webber_default) ;
 	# We set some defaults values here
-	if (defined $webber_default{'wbbDebugFile'} ) {set_debug_file ($webber_default{'wbbDebugFile'} ); }
-
+	$webber_default{'wbbInteractive'} = "1" ;
+	$webber_default{'subtitle'} = "" ;
+	$webber_default{'title'} = "Titulo de la pagina" ;
 }
 
 
@@ -369,6 +372,7 @@ foreach my $k (sort keys %webs_hash) {
 		copy_hash($rt, \%webber_env);
 		
 		%webberhash = () ;
+	
 		read_webber_file ($$rh{'config'}, \%webberhash) ;
                 $rt= $$rh{'local'} ;
                 #foreach my $k (keys %$rt) { print STDERR " LOCAL $k ==> $$rt{$k}\n" ; }
@@ -389,14 +393,29 @@ sub handler {
       unless ($f->ctx) { 
 	 $f->r->headers_out->unset('Content-Length');
         $f->r->content_type("text/html; charset=UTF-8");
-          $f->ctx(1); 
+ #         $f->ctx(1); 
       } 
- 
- 	my $string = "" ;
- 
-      while ($f->read(my $buffer, BUFF_LEN)) { 
-          $string .= $buffer ; 
+
+
+      #my $leftover = $f->ctx;
+       my $string = "" ;
+        my $buffer="" ;
+
+      while ($f->read(my $buffer, BUFF_LEN)) {
+       #   $buffer = $leftover . $buffer if defined $leftover;
+        #  $leftover = undef;
+	  $string .=$buffer ;
 	}
+  
+#      if ($f->seen_eos) {
+#	  $string .= $leftover if defined $leftover ;
+#          #$f->print(scalar reverse $leftover) if defined $leftover;
+ #     }
+  #    else {
+   #       $f->ctx($leftover) if defined $leftover;
+    #  }
+  
+ 
 	
 # todo esto deberia estar en un fichero de configuracion 
 #	set_webber_env("WBBROOT","/rep0sitorio/servicios/web/webber/" ) ;
@@ -406,7 +425,7 @@ sub handler {
 #	init_webber (\%webberhash) ;
 
 # Esto es el webbeo 
-	
+	debug (10,"la entrada ha sido\n $string") ;	
 
         my $r= $f->r() ;
         my $s= $r->server() ;
@@ -418,16 +437,15 @@ sub handler {
 #	print  STDERR "Peticion de $host$uri\n" ;
 	# Precargamos el hash con la infomracion 	
 	lookup_web ($host .  $uri);
-	if (defined $webberhash{'wbbDebugFile'} ) {set_debug_file ($webberhash{'wbbDebugFile'} ); }
 	#cargamos la pagina en formato webber
         string2webber($string, \%webberhash) ;	
 	do_webber(\%webberhash) ;
 
 	my @out = split /\n/, $webberhash{'wbbOut'} ; 
 	for (my $i=0 ; $i!=@out ; $i++) {
-			  $f->print("$out[$i]\n") ;  }
-	# importante "flush" de los datos !!
-      $f->seen_eos(1); 
+			  $f->print($out[$i]. "\n" ) ;  }
+	debug (10,"JODER y el wbbOUT es:\n$webberhash{'wbbOut'}");
+ 	 $f->seen_eos(1);	
       return Apache2::Const::OK; 
   } 
 
