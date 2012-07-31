@@ -58,10 +58,11 @@ sub main::debug_print {
         my $line= "[$name]<$level> :" .  join '', @lines ;
         chomp $line ;
         if ( defined ($webber_default{'wbbDebugFile'}) &&  ($webber_default{'wbbDebugFile'} !~/stderr/i))   {
-                open FILE, ">>$webber_default{'wbbDebugFile'}" ;
+                if ($webber_default{'wbbDebug'} >= $level) { 
+		open FILE, ">>$webber_default{'wbbDebugFile'}" ;
                 print FILE "$line\n" ;
                 close FILE ;
-        }
+        }}
         else {
         $line =" (wbbDebugFile undefined) " . $line ;
         print STDERR "$line\n"  if  defined $webber_default{'wbbDebug'} ;
@@ -111,7 +112,7 @@ sub string2webber {
 	my ($line, $varname) ;	
 	$varname="" ;
 	for  (my $loop=0 ; $loop!=@hash ; $loop++) {
-			debug(1,"procesando linea[$loop]=$hash[$loop]");
+#			debug(1,"procesando linea[$loop]=$hash[$loop]");
 		$line=$hash[$loop] ;
 		#Same as read_webber_file ;-)
 		if ($line =~ /^##/) { # Comentarios ...
@@ -213,7 +214,7 @@ sub EvaluateVar  {
         my $ref = $_[1] ;
         my $c ;
 	my %var ;
-	debug (3, "Entrada en EvaluateVar con Line= $lin" ) ;
+#	debug (3, "Entrada en EvaluateVar con Line= $lin" ) ;
 
         while ($lin =~ /.*\$var\(([\w]+[a-zA-Z0-9_.\-]*)\).*/ ) {
                 $c = $$ref{$1} ;
@@ -228,7 +229,7 @@ sub EvaluateVar  {
 #                $lin =~ s/\$orig\($1\)/$c/ ;
 #        }
 
-	debug (3, "Salida de EvalueateVar con Line =$lin") ; 
+#	debug (3, "Salida de EvalueateVar con Line =$lin") ; 
         return $lin ;
         }
 
@@ -445,7 +446,7 @@ sub handler {
 #	init_webber (\%webberhash) ;
 
 # Esto es el webbeo 
-	debug (10,"la entrada ha sido\n $string") ;	
+#	debug (10,"la entrada ha sido\n $string") ;	
 
         my $r= $f->r() ;
         my $s= $r->server() ;
@@ -464,7 +465,7 @@ sub handler {
 	my @out = split /\n/, $webberhash{'wbbOut'} ; 
 	for (my $i=0 ; $i!=@out ; $i++) {
 			  $f->print($out[$i]. "\n" ) ;  }
-	debug (10,"JODER y el wbbOUT es:\n$webberhash{'wbbOut'}");
+#	debug (10,"JODER y el wbbOUT es:\n$webberhash{'wbbOut'}");
  	 $f->seen_eos(1);	
       return Apache2::Const::OK; 
   } 
