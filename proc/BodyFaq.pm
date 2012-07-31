@@ -54,7 +54,7 @@ my %def = (
 	'bodyfaq.tocsty' => "<li><a href = \"#VALUE\"> VALUE CODE </a></li>" ,
 	'bodyfaq.entrys' => "<h2><a name = \"VALUE\"> CODE </a></h2><p>" ,
 	'bodyfaq.sep'    => "TIT" , 
-	'bodyfaq.place'  => 'wbbOut' , 
+	'bodyfaq.place'  => 'wbbIn' , 
 ) ;
 my $defpretoc="<h1><center>Indice de Contenidos</center></h1><hr><p><ul>" ;
 my $defpostoc="</ul><p>" ;

@@ -51,9 +51,9 @@ use strict "subs" ;
 sub  xml2array {
 # Note incomplete XML parsing ...
         my $cad =$_[0] ;
+	my @ret ;
 	debug (3, "menu xml2array:input is $cad" ) ;
         my @tmp= split /<\/menuitem>/msi , $cad  ;
-      	my @ret ;
 	foreach my $i (@tmp) {
 		debug (3, "menuxmlarray processing $i");
 		my $rh = {} ;
@@ -197,7 +197,8 @@ sub  menu
 		#menu.$var.key= indica nombre del valor en las entradas que indica la clave
 		debug (3, "menu.$var.key= " . $$rh{"menu.$var.key"}) ;
 		debug (3, "menu.$var.active = " . $$rh{"menu.$var.active"}) ;
-		if ($$i{$$rh{"menu.$var.key"}} =~ /$$rh{"menu.$var.active"}/ ) {  $lin= $template_actived ;
+		
+		if ( ( defined ($$rh{"menu.$var.active"}) ) && (defined ($$i{$$rh{"menu.$var.key"}}) )  && ($$i{$$rh{"menu.$var.key"}} =~ /$$rh{"menu.$var.active"}/ ) ) {  $lin= $template_actived ;
 				debug (3, "menu.$var.key   =". $$i{$$rh{"menu.$var.key"}}  ."\nmenu.$var.active=". $$rh{"menu.$var.active"});
 				}
 		else {		$lin= $template ; }

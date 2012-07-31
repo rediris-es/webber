@@ -470,7 +470,7 @@ sub macro {
                 $lin = $1 . includecode($2,$3,$4) .$5 ; }
 		elsif  ($lin =~ /(.*)#listfromfile\((.*),(.*),(.*)\)(.*)/) {
 		if ($lin =~ /\\#listfromfile/) {$lin=~ s/\\#listfromfile/#listfromfile/; next ; }
-		$lin = $1 . listfromfile($2,$3,$4) , $5 ; }
+		$lin = $1 . listfromfile($2,$3,$4) . $5 ; }
 		elsif ($lin  =~ /(.*)#tablefromcsv\((.*),(.*),(.*),(.*)\)(.*)/) {
 		if ($lin =~ /\\#tablefromcsv/) { $lin=~ s/\\#tablefromcsv/#tablefromcsv/ ; next;}
 		$lin = $1 . tablefromcsv($2,$3,$4,$5) .$6 ;}
