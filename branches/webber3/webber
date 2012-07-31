@@ -1,4 +1,5 @@
 #!/usr/bin/perl  -w 
+#!/usr/bin/perl -w
 #----------------------------------------------------------------------
 #                         __       __                      
 #                        /\ \     /\ \                     
@@ -39,6 +40,7 @@ our (%var, %wbbDef, @environment ) ;
 ### OK
 ## declaración anticipada de algunas funciones
 sub debug; 	# Impresion de mensajes de depuracion
+sub debug_print ; # otro mas
 sub push_var;	# Se va a tener un entorno (%var) comun, y 
 		# una pila de entornos, esto apila un entorno
 sub pop_var;    # Y esto recreea el anterior.
