@@ -260,9 +260,10 @@ sub filelang {
 		 $$rv{'wbbTarget'} =  join ("/", @dirs)  . "/" .  $name .  $$rv{'wbbExtension'} ; 
 		}	
 		
-	}
+	
   	debug (1, "FileLang end,   filename= $$rv{'wbbActualfile'}") ;
         debug (1, "FileLang end  target = $$rv{'wbbTarget'}") ;
+	}
 	        #print STDERR "FileLang, salimos aqui src= $$rv{'wbbActualfile'} dst=$$rv{'wbbTarget'} \n " ;
 }
 
@@ -292,6 +293,10 @@ sub langreduction {
 sub otherlang {
 	my $rv = shift ;
 	my $msg ="" ;
+	  if (defined ($$rv{'wbbInteractive'}) &&  (( $$rv{'wbbInteractive'} ne "0" ) || ( $$rv{'wbbIn    teractive'} ne "no")) )  {
+	 # No option for other lang if wbbInteractive
+	}
+	else {
 	if (defined $$rv{'wbbLang'} ) {
 		debug (1, "FileLang::otherlang is called , language of the page  is $$rv{'wbbLang'} !!" ) ;
 		my $lang=$$rv{'wbbLang'} ;
@@ -332,10 +337,16 @@ sub otherlang {
 	}
 	else { debug( 1, "FileLang::otherlang called , but wbbLang not defined!!") ; }
 }
+}
 
 sub linkfix  { 
 	my $rv= shift ;
 	my $banner= "$name\:\:linkfix : " ;
+
+	 if (defined ($$rv{'wbbInteractive'}) &&  (( $$rv{'wbbInteractive'} ne "0" ) || ( $$rv{'wbbInteractive'} ne "no"))  ) {
+	# No action if interactive 
+	}
+	else {
 	#$$rv{'wbbDebug'} =10 ;
 	my $count=0 ;
 	debug (1, "$banner se ejecuta") ;
@@ -374,7 +385,7 @@ sub linkfix  {
 		debug (1," $banner links correguidos en $$rv{'wbbSoruce'} var $var = $count\n") ; 
 		$$rv{$var} = $txt ; 
 		}
-
+}
 }
 
 
