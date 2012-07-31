@@ -15,7 +15,7 @@ DOC=$(USR)/share/doc/
 ETC=${ROOT}/etc
 LOG= ${VAR}/log/webber/
 HTML=${VAR}/www/html/webber
-
+PERLPATH=/usr/share/perl5/vendor_perl
 IC=install
 
 # Parece que el install de MacOs no es todo lo bueno que quisieramos
@@ -38,12 +38,12 @@ install_apache: ; \
 	mkdir -p $(ETC)/logrotate.d/
 	mkdir -p $(ETC)/webber/
 	mkdir -p $(DOC)/webber
-	mkdir -p $(ROOT)/usr/lib/perl5/5.8.8/Webber
+	mkdir -p $(ROOT)$(PERLPATH)/Webber
 	$(IC) dynamic/mod_perl2/webber.conf $(ETC)/httpd/conf.d/
 	$(IC) dynamic/mod_perl2/readme-modperl2.txt $(DOC)/webber/
 	$(IC) dynamic/mod_perl2/apache-config.xml $(ETC)/webber/
-	$(IC) dynamic/mod_perl2/Webber/*  $(ROOT)/usr/lib/perl5/5.8.8/Webber/
-	$(IC) dynamic/mod_perl2/startup.pl $(ROOT)/usr/lib/perl5/5.8.8/Webber/
+	$(IC) dynamic/mod_perl2/Webber/*  $(ROOT)$(PERLPATH)/Webber/
+	$(IC) dynamic/mod_perl2/startup.pl $(ROOT)$(PERLPATH)/Webber/
 	mkdir -p $(HTML)
 	$(IC) dynamic/mod_perl2/example/* $(HTML)
 	$(IC) dynamic/mod_perl2/webber.logrotate $(ETC)/logrotate.d/
