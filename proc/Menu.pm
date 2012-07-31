@@ -183,20 +183,21 @@ sub  menu
 	else {
 		debug(3, "XX= menu.$var.type = $$rh{\"menu.$var.type\"}" ) ;
 		debug(3, "default template procesador Menu is $defs{'menu.td.template'}") ;
-		debug(3, "templated set to $$rh{'menu.td.template'}") ;
+		debug(3, "templated set to $$rh{'menu.td.template'}") if (defined ($$rh{'menu.td.template'}));
 		 $template= defined ($$rh{"menu.$var.template"}) ? $$rh{"menu.$var.template"} : $templatetd ;
 		debug (2,"setting output template to td style = $template");
 		 }
   	  $template_actived= defined ($$rh{"menu.$var.template.current"} ) ? $$rh{"menu.$var.template.current"} : $template ; 
-	debug (2, "Menu  $var contenido $$rh{$var}") ;
+	$$rh{$var} = "" unless (defined $$rh{$var}) ;
+	debug  (2, "Menu  $var contenido $$rh{$var}") ;
    	debug (2, "template= $template , templateli=$templateli templatetd=$templatetd") ;  
 	my @entries = xml2array ( $$rh{$var} ) ;
 	my $output = $pre;
 	foreach my $i (@entries) {
 		my $lin ;
 		#menu.$var.key= indica nombre del valor en las entradas que indica la clave
-		debug (3, "menu.$var.key= " . $$rh{"menu.$var.key"}) ;
-		debug (3, "menu.$var.active = " . $$rh{"menu.$var.active"}) ;
+		debug (3, "menu.$var.key= " . $$rh{"menu.$var.key"}) if ( (defined ($$rh{"menu.$var.key"}) ) ) ;
+		debug (3, "menu.$var.active = " . $$rh{"menu.$var.active"}) if (( defined ($$rh{"menu.$var.key"}))) ;
 		
 		if ( ( defined ($$rh{"menu.$var.active"}) ) && (defined ($$i{$$rh{"menu.$var.key"}}) )  && ($$i{$$rh{"menu.$var.key"}} =~ /$$rh{"menu.$var.active"}/ ) ) {  $lin= $template_actived ;
 				debug (3, "menu.$var.key   =". $$i{$$rh{"menu.$var.key"}}  ."\nmenu.$var.active=". $$rh{"menu.$var.active"});
