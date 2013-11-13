@@ -119,7 +119,7 @@ sub webbo
 
     debug  (1, "Webbo::webbo se ejecuta") ;
     debug  (1, "webbo.src = $$var{'webbo.src'}") ;
-    debug  (1, "webbo.dst = $$var{'webbo.dst'}\n")  if (defined $$var{'webbo.dst'});
+    debug  (1, "webbo.dst = $$var{'webbo.dst'}\n") ;
 
     if (exists ($$var{'webbo.regex.pre'} )) { $expVAR1=$$var{'webbo.regex.pre'} ; }
     if (exists ($$var{'webbo.regex.post'} )) { $expVAR2=$$var{'webbo.regex.post'} ; }
@@ -176,7 +176,9 @@ $webboDst = $$var{"webbo.dst"} if exists $$var{"webbo.dst"};
         if ($k ne $webboDst)
         {
            my $rex = $expVAR1.$k.$expVAR2;
-	   debug (5, "rex= $rex k= $k  valor $$var{$k}" ) ;
+           my $sub= $$var{"$k"} ;
+# FJMC 20131113 No se porque pero el $$var{"$k"} falla y se impimre mal cuando es el copyfiles asi que lo comento el debug este
+#	   debug (5 ,  "rex=" . $rex  .  " k=" . $k . " valor=" . "$sub"  ) ;
            $$var{$webboDst} =~ s/$rex/$$var{$k}/g;
         }
      }

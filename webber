@@ -1,5 +1,4 @@
 #!/usr/bin/perl  -w 
-#!/usr/bin/perl -w
 #----------------------------------------------------------------------
 #                         __       __                      
 #                        /\ \     /\ \                     
@@ -40,7 +39,6 @@ our (%var, %wbbDef, @environment ) ;
 ### OK
 ## declaración anticipada de algunas funciones
 sub debug; 	# Impresion de mensajes de depuracion
-sub debug_print ; # otro mas
 sub push_var;	# Se va a tener un entorno (%var) comun, y 
 		# una pila de entornos, esto apila un entorno
 sub pop_var;    # Y esto recreea el anterior.
@@ -71,7 +69,7 @@ $opt_i =0 ;
 $opt_t="" ;
 @opt_s = () ;
 @opt_lazy = () ;
-$opt_C = "" ;
+$opt_C = "/etc/webber/webber.wbb" ;
 
 GetOptions (
 	"help|ayuda|h|?" => \$opt_help ,
@@ -129,8 +127,8 @@ $wbbDef{'wbbDebugFile'} = defined $ENV{'WBBDEBUGFILE'} ? $ENV{'WBBDEBUGFILE'} : 
 
 $wbbDef{'wbbexttmp'} = defined $ENV{'WBBEXTTMP'} ?  $ENV{'WBBEXTTMP'} : defined $wbbDef{'wbbexttmp'} ? $wbbDef{'wbbexttmp'} : '.tmp' ;
 
-$wbbDef{'wbbTargetRoot'} = defined $ENV{'WBBTARGETROOT'} ? $ENV{'WBBTARGETROOT'} : defined $wbbDef{'wbbTargetRoot'} ? $wbbDef{'wbbTargetRoot'} : "$wbbDef{'wbbRoot'}" . "/src"  ;
-$wbbDef{'wbbSourceRoot'} = defined $ENV{'WBBSOURCEROOT'} ? $ENV{'WBBSOURCEROOT'} : defined $wbbDef{'wbbSourceRoot'} ? $wbbDef{'wbbSourceRoot'} : "$wbbDef{'wbbRoot'}" . "/html" ;
+$wbbDef{'wbbTargetRoot'} = defined $ENV{'WBBTARGETROOT'} ? $ENV{'WBBTARGETROOT'} : defined $wbbDef{'wbbTargetRoot'} ? $wbbDef{'wbbTargetRoot'} : "$wbbDef{'wbbRoot'}" . "/html"  ;
+$wbbDef{'wbbSourceRoot'} = defined $ENV{'WBBSOURCEROOT'} ? $ENV{'WBBSOURCEROOT'} : defined $wbbDef{'wbbSourceRoot'} ? $wbbDef{'wbbSourceRoot'} : "$wbbDef{'wbbRoot'}" . "" ;
 
 
 
@@ -208,11 +206,14 @@ else {
          }  
       }
       elsif (-f $page) {
+	 debug (1 ,"Debug (Webber Main) go for page $page\n") ;
          my @page = split /\//, $page;
          my $dir = join "/", @page[0..$#page-1];
          my $pag = $page[$#page];
+	  debug (1,"Debug (Webber Main) directoriy to change is $dir\n") ;
          die "Can't access dir $dir" if "$dir" ne "" and !(chdir ($dir));
          my $cwd = getcwd();
+	 debug (1, "cwd es $cwd\n") ;
          &InitVars;
          &ReadTemplatesRec($cwd);
  	if ($pag =~ /$var{wbbFileNameRegExp}/ && $pag ne $var{wbbTemplateName}) {
@@ -376,7 +377,7 @@ sub runprocs {
          	debug (1," [$proclist] Using processor  $thisp ..." ) ;
          	my ($package, $sname) = split /::/,$thisp;
          	require $package .".pm" ;
-		if  ( (defined $var{'wbbEnd'})  && ( $var{'wbbEnd'} == 1)) { return ; }
+		if  ( (defined $var{'wbbEnd'})  && ( $var{'wbbEnd'} == 1)) { debug (1, "wbbEnd is defined ending proc chain"); return ; }
          	&$thisp( \%var );
          	debug (1, "\n" ) ;
 	}
@@ -444,12 +445,13 @@ sub ReadTemplate {
    &readVars ($var{wbbTemplateName}, "template", \%var);
 }
 
+
 #----------------------------------------------------------------------
 # Function: ReadTemplatesRec
 #----------------------------------------------------------------------
 sub ReadTemplatesRec {
    my($dir) = @_;
-   debug(1, "Debug: (ReadTemplatesRec) processing recursive templates at \"$dir\" \n") ;
+   debug(1, "Debug: (ReadTemplatesRec) processing recursive templates at \"$dir\" until reach \"$var{'wbbSourceRoot'}\"\n") ;
    $dir =~ /^(.*)\//;
    my $newdir = $1;
    &ReadTemplatesRec($newdir) if (($dir ne $var{'wbbSourceRoot'} || $dir eq "/" || ($dir =~ /.:/)) && ($newdir ne ""));
@@ -530,6 +532,7 @@ sub EvaluateVar  {
 	my $c ;
         while ($lin =~ /.*\$var\(([\w]+[a-zA-Z0-9_.\-]*)\).*/ ) {
 		$c = $$ref{$1} ;
+		debug (2, "Variaable $c no tiene valor\n" ) unless defined ($c) ;
 		debug (2, "Var $1 evaluada, valor =$c") ;
                 $lin =~ s/\$var\($1\)/$c/ ;
         }
@@ -578,6 +581,7 @@ sub debug_print{
 	if ( defined ($var{'wbbDebugFile'}) &&  ($var{'wbbDebugFile'} !~/stderr/i))   {
 		open FILE, ">>$var{'wbbDebugFile'}" ;
 		print FILE "$line\n" ;
+		#print STDERR  "$line\n" ;
 		close FILE ;
 	}
 	else {

@@ -491,7 +491,7 @@ sub macro {
 		}
 		$array[$j] =$lin . "\n"  ;
 	}
-	$$var{$place} = join "", @array  ;	
+	$$var{$place} = join "" , @array  ;	
 
 }
 

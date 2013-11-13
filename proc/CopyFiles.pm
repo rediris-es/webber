@@ -219,7 +219,7 @@ sub do_work
 sub copyfiles  {
  my $lin="" ;
  $var = $_[0] ;
- if ($$var{'wbbInteractive'} eq "1") {
+ if (defined ($$var{'wbbInteractive'}) && ($$var{'wbbInteractive'} eq "1")) {
 	debug (2, " CGI mode don't do anything") ;
 	}
 else {
