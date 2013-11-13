@@ -193,6 +193,7 @@ sub SetTarget {
 sub WriteVar  
 {
 
+  debug (1 , "File::WriteVar se ejecuta" ) ;
   my $refvar =$_[0] ;
     my $outvar="wbbOut" ;
    if (defined $$refvar{'File::WriteVar'} ) { $outvar=$$refvar{'File.WriteVar'} ; }

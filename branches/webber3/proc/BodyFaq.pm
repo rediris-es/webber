@@ -54,7 +54,7 @@ my %def = (
 	'bodyfaq.tocsty' => "<li><a href = \"#VALUE\"> VALUE CODE </a></li>" ,
 	'bodyfaq.entrys' => "<h2><a name = \"VALUE\"> CODE </a></h2><p>" ,
 	'bodyfaq.sep'    => "TIT" , 
-	'bodyfaq.place'  => 'wbbIn' , 
+	'bodyfaq.place'  => 'wbbOut' , 
 ) ;
 my $defpretoc="<h1><center>Indice de Contenidos</center></h1><hr><p><ul>" ;
 my $defpostoc="</ul><p>" ;
@@ -174,7 +174,7 @@ sub bodyfaq
     $label="0" ;
     $value="" ;
     @toc=() ;
-    @array=split /\n/, $$var{$place} ;
+    @array=split /\n/, $place ;
 
     my @lines ;
     for ($i=0 ; $i!=@array ; $i++) {
