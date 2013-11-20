@@ -223,7 +223,7 @@ sub copyfiles  {
 	debug (2, " CGI mode don't do anything") ;
 	}
 else {
- debug (3, STDERR "procesing $$var{'wbbSource'}\n" ) ;
+ debug (3, "procesing $$var{'wbbSource'}\n" ) ;
  $wbbDebug = $$var{'wbbDebug'} ;
  $wbbSourceRoot= $$var{'wbbSourceRoot'} ;
  $wbbTargetRoot= $$var{'wbbTargetRoot'} ;
@@ -270,7 +270,7 @@ else {
 #----------------------------------------------------------------------
 sub wbbCopyRecursive(&@) {
     my ($code, $src, $dst) = @_;
-    print STDERR "wbbCopyRecursive code=$code src=$src dst=$dst\n" ;
+    debug (3, "wbbCopyRecursive code=$code src=$src dst=$dst\n") ;
     my @src = File::Spec->splitdir($src);
     pop @src unless defined $src[$#src] and $src[$#src] ne '';
     my $src_level = @src;
