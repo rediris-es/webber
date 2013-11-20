@@ -151,7 +151,7 @@ if ( $fullpath == 1)  {  $destino = getcwd() . "/$relpath" . basename ($origen) 
   if ($mtime_origen > $mtime_destino) { 
    ## COPIAR , origen, $DESTINo) ; 
     debug (1, "copy ($origen,$destino)")  ;
-   print STDERR "do_cpfile 1 copy $origen -> $destino\n" ;
+#   print STDERR "do_cpfile 1 copy $origen -> $destino\n" ;
    copy ($origen,$destino) ;
   }
  } 
@@ -160,7 +160,7 @@ if ( $fullpath == 1)  {  $destino = getcwd() . "/$relpath" . basename ($origen) 
   if (!-d $ruta_destino) { mkpath ($ruta_destino,0,0755) ; }
   ## copiar , $origen, destino
   debug (1, "copy ($origen, $destino)") ;
-   print STDERR "do_cpfile 2 copy $origen -> $destino\n" ;
+#   print STDERR "do_cpfile 2 copy $origen -> $destino\n" ;
   copy ($origen,$destino) ;
  }
 }
@@ -223,7 +223,7 @@ sub copyfiles  {
 	debug (2, " CGI mode don't do anything") ;
 	}
 else {
- print STDERR "procesing $$var{'wbbSource'}\n"  ;
+ debug (3, STDERR "procesing $$var{'wbbSource'}\n" ) ;
  $wbbDebug = $$var{'wbbDebug'} ;
  $wbbSourceRoot= $$var{'wbbSourceRoot'} ;
  $wbbTargetRoot= $$var{'wbbTargetRoot'} ;
@@ -290,7 +290,7 @@ sub wbbCopyRecursive(&@) {
 # wbbCopyDir
 #----------------------------------------------------------------------
 sub wbbCopyDir {
-    wbbCopyRecursive { -d $_[0] ? do { mkdir($_[1]) unless -d $_[1] } :print  STDERR "wbbCopyDir $_[0] -> $_[1]\n" ;  copy(@_) } @_;
+    wbbCopyRecursive { -d $_[0] ? do { mkdir($_[1]) unless -d $_[1] } : debug (3, "wbbCopyDir $_[0] -> $_[1]\n") ;  copy(@_) } @_;
 }
   
 
