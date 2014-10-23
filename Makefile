@@ -18,7 +18,7 @@ HTML=${VAR}/www/html/webber
 
 IC=install
 
-# Parece que el install de MacOs no es todo lo bueno que quisieramos
+# Parece que el install de MacOS no es todo lo bueno que quisieramos
 
 install_webber: ; \
 	mkdir -p $(BIN)
