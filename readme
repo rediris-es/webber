@@ -2,7 +2,7 @@
 Redme for webber.
 
 
- This is a fresh port webber system, without any reference to the RedIRIS's implementation of it.
+ This is a fresh port of former webber 'cli CMS', without any references to the RedIRIS's implementation
 
 Webber is mainly a HTML formatter, that has been used since 1995 at RedIRIS to build the HTML pages. It was designed mainly to:
 
