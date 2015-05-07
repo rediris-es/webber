@@ -16,6 +16,7 @@
 #----------------------------------------------------------------------
 package Webbo;
 use Cwd;
+use strict ;
 
 my $name=	"Webbo";
 my $version=	"2.1";
@@ -24,22 +25,39 @@ my $expVAR=  '<var name\s*\=\s*\"(w+)\"\s*\/>';
 my $expVAR1= '<var name\s*\=\s*\"';
 my $expVAR2= '\"\s*\/>';
 
+#DEBUG-INSERT-START
 
 #-------------------------------------------------------------------------
-# Function: debug 
+# Function: debug
+# Version 2.0
+# Permite el "debug por niveles independientes"
+ 
 #-------------------------------------------------------------------------
 sub debug {
         my @lines = @_ ;
-        my $level = shift @lines ;
-        if (defined (&wbbdebug)) { wbbdebug (@lines) ; }
-	elsif (defined main::debug) { main::debug (@lines) ; }
-        else {
+# Por el tema de strict 
+        no strict "subs" ;
+	my $level = $lines[0] ;
+	unshift @lines , $name;
+        if (defined main::debug_print) { main::debug_print (@lines) ; }
+       else {
+          my $level = shift @lines ;
         my $line= join '', @lines ;
         chomp $line ;
-        print STDERR "$line\n" ;
+        print STDERR "$name: $line\n" ;
         }
-        }
+use strict "subs" ;
+# Joder mierda del strict 
+}
 # End Funcion debug
+
+
+
+#DEBUG-INSERT-END
+
+
+
+
 
 sub info {
    print "$name: v$version: Incorporate variables into page templates\n";
@@ -79,6 +97,9 @@ $name uses the following Webber variables:
  #webbo.dst: Defines the destination of $name processing. If no destination is
              specified, #wbbOut (equivalent to "#webbo.dst = wbbOut") is used.
 
+ #webbo.regex.pre: The start of the regular expresion (defaults to: $expVAR1 )
+ #webbo.regex.post: The end  of the regular expresion (defaults to: $expVAR2 )
+
  Any other:  Any other variable referred in a <var /> tag, subsituting the
              tag for the variable value in #wbbOut.
 
@@ -94,15 +115,32 @@ FINAL
 #----------------------------------------------------------------------
 sub webbo
 {
-   $var = $_[0];
+   my $var = $_[0];
 
     debug  (1, "Webbo::webbo se ejecuta") ;
+    debug  (1, "webbo.src = $$var{'webbo.src'}") ;
+    debug  (1, "webbo.dst = $$var{'webbo.dst'}\n") ;
+
+    if (exists ($$var{'webbo.regex.pre'} )) { $expVAR1=$$var{'webbo.regex.pre'} ; }
+    if (exists ($$var{'webbo.regex.post'} )) { $expVAR2=$$var{'webbo.regex.post'} ; }
+	
+    $expVAR= $expVAR1 . "(\\w+)" . $expVAR2 ;
+
+	debug (2, "webbo.regex.pre = $expVAR1" ) ;
+	debug (2, "webbo.regex.post= $expVAR2" ) ;
+	debug (2, "Regex= $expVAR") ;
+
+   my ($webboSrc , $webboDst) ;
+
 if (exists $$var{"webbo.src"}) 
 {
   my ($srcClass, $srcName) = split /:/,$$var{"webbo.src"};
   if ($srcClass eq "file") 
   { 
     $webboSrc = &leeDatos($srcName);
+    debug  (3, "Template file read from $srcName" );
+     
+     debug (5, "valor de webboSrc :\n ", $webboSrc) ;
     $webboSrc = "" if ($webboSrc eq "-1");
   }
   elsif ($srcClass eq "var") 
@@ -120,7 +158,7 @@ else
   $webboSrc = $$var{wbbIn};
 }
 
-$webboDst = "wbbOut";
+ $webboDst = "wbbOut";
 $webboDst = $$var{"webbo.dst"} if exists $$var{"webbo.dst"};
    debug  (1, "Webbo: La salida estara en $webboDst") ;
 #-- FALTA --
@@ -131,14 +169,16 @@ $webboDst = $$var{"webbo.dst"} if exists $$var{"webbo.dst"};
 
    #-- Lo hacemos 2 veces porque se ha dado el caso en el que con
    #   una sola vez no se resolvían todas las variables
-   for ($i=1 ; $i<=2 ; $i++)
+   for (my $i=1 ; $i<=2 ; $i++)
    {
      foreach my $k ( sort keys %$var) 
      {
         if ($k ne $webboDst)
         {
            my $rex = $expVAR1.$k.$expVAR2;
-	   #debug (0, "rex= $rex k= $k  valor $$var{$k}" ) ;
+           my $sub= $$var{"$k"} ;
+# FJMC 20131113 No se porque pero el $$var{"$k"} falla y se impimre mal cuando es el copyfiles asi que lo comento el debug este
+#	   debug (5 ,  "rex=" . $rex  .  " k=" . $k . " valor=" . "$sub"  ) ;
            $$var{$webboDst} =~ s/$rex/$$var{$k}/g;
         }
      }
@@ -151,8 +191,8 @@ $webboDst = $$var{"webbo.dst"} if exists $$var{"webbo.dst"};
 #----------------------------------------------------------------------
 sub leeDatos
 {
-local ($file) = @_;
-local ($datos);
+my  ($file) = @_;
+my ($datos);
 
   if (-f $file)
   {
@@ -163,8 +203,8 @@ local ($datos);
   }
   else
   {
-    $e = $!;
-    $error = "Error opening $file: $e";
+    my $e = $!;
+    my $error = "Error opening $file: $e";
     syslog ("err", $error);
     return ("-1");
   }

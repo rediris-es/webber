@@ -16,28 +16,41 @@ use File::Find;
 use File::Spec;
 require HTML::LinkExtor;
 use POSIX ;
-#use strict ;
+use strict ;
 
 
+#DEBUG-INSERT-START
 
 #-------------------------------------------------------------------------
-# Function: debug 
+# Function: debug
+# Version 2.0
+# Permite el "debug por niveles independientes"
+ 
 #-------------------------------------------------------------------------
 sub debug {
         my @lines = @_ ;
-#        my $level = shift @lines ;
-        if (defined (&wbbdebug)) { wbbdebug ( @lines) ; }
-        elsif (defined main::debug) { main::debug (@lines) ; }
-        else {
-         my $level = shift @lines ;
+# Por el tema de strict 
+        no strict "subs" ;
+	my $level = $lines[0] ;
+	unshift @lines , $name;
+        if (defined main::debug_print) { main::debug_print (@lines) ; }
+       else {
+          my $level = shift @lines ;
         my $line= join '', @lines ;
         chomp $line ;
-        print STDERR "$line\n" ;
+        print STDERR "$name: $line\n" ;
         }
-        }# End Funcion debug
-
-
+use strict "subs" ;
+# Joder mierda del strict 
+}
 # End Funcion debug
+
+
+
+#DEBUG-INSERT-END
+
+
+
 
 
 my ($wbbDebug, $wbbSourceRoot, $wbbTargetRoot) ;
@@ -138,7 +151,7 @@ if ( $fullpath == 1)  {  $destino = getcwd() . "/$relpath" . basename ($origen) 
   if ($mtime_origen > $mtime_destino) { 
    ## COPIAR , origen, $DESTINo) ; 
     debug (1, "copy ($origen,$destino)")  ;
-   print STDERR "do_cpfile 1 copy $origen -> $destino\n" ;
+#   print STDERR "do_cpfile 1 copy $origen -> $destino\n" ;
    copy ($origen,$destino) ;
   }
  } 
@@ -147,7 +160,7 @@ if ( $fullpath == 1)  {  $destino = getcwd() . "/$relpath" . basename ($origen) 
   if (!-d $ruta_destino) { mkpath ($ruta_destino,0,0755) ; }
   ## copiar , $origen, destino
   debug (1, "copy ($origen, $destino)") ;
-   print STDERR "do_cpfile 2 copy $origen -> $destino\n" ;
+#   print STDERR "do_cpfile 2 copy $origen -> $destino\n" ;
   copy ($origen,$destino) ;
  }
 }
@@ -206,11 +219,11 @@ sub do_work
 sub copyfiles  {
  my $lin="" ;
  $var = $_[0] ;
- if ($$var{'wbbInteractive'} eq "1") {
+ if (defined ($$var{'wbbInteractive'}) && ($$var{'wbbInteractive'} eq "1")) {
 	debug (2, " CGI mode don't do anything") ;
 	}
 else {
- print STDERR "procesing $$var{'wbbSource'}\n"  ;º
+ debug (3, "procesing $$var{'wbbSource'}\n" ) ;
  $wbbDebug = $$var{'wbbDebug'} ;
  $wbbSourceRoot= $$var{'wbbSourceRoot'} ;
  $wbbTargetRoot= $$var{'wbbTargetRoot'} ;
@@ -257,7 +270,7 @@ else {
 #----------------------------------------------------------------------
 sub wbbCopyRecursive(&@) {
     my ($code, $src, $dst) = @_;
-    print STDERR "wbbCopyRecursive code=$code src=$src dst=$dst\n" ;
+    debug (3, "wbbCopyRecursive code=$code src=$src dst=$dst\n") ;
     my @src = File::Spec->splitdir($src);
     pop @src unless defined $src[$#src] and $src[$#src] ne '';
     my $src_level = @src;
@@ -277,7 +290,7 @@ sub wbbCopyRecursive(&@) {
 # wbbCopyDir
 #----------------------------------------------------------------------
 sub wbbCopyDir {
-    wbbCopyRecursive { -d $_[0] ? do { mkdir($_[1]) unless -d $_[1] } :print  STDERR "wbbCopyDir $_[0] -> $_[1]\n" ;  copy(@_) } @_;
+    wbbCopyRecursive { -d $_[0] ? do { mkdir($_[1]) unless -d $_[1] } : debug (3, "wbbCopyDir $_[0] -> $_[1]\n") ;  copy(@_) } @_;
 }
   
 

@@ -6,23 +6,47 @@
 package Menu;
 
 use strict ;
-no strict "subs";
 
+
+my $name=       "Menu";
+my $version=    "1.0";
+
+
+
+#DEBUG-INSERT-START
 
 #-------------------------------------------------------------------------
-# Function: debug 
+# Function: debug
+# Version 2.0
+# Permite el "debug por niveles independientes"
+ 
 #-------------------------------------------------------------------------
 sub debug {
         my @lines = @_ ;
-        if (defined (&wbbdebug)) { wbbdebug (@lines) ; }
-        elsif (defined main::debug) { main::debug (@lines) ; }
-        else {
+# Por el tema de strict 
+        no strict "subs" ;
+	my $level = $lines[0] ;
+	unshift @lines , $name;
+        if (defined main::debug_print) { main::debug_print (@lines) ; }
+       else {
           my $level = shift @lines ;
         my $line= join '', @lines ;
         chomp $line ;
-        print STDERR "$line\n" ;
+        print STDERR "$name: $line\n" ;
         }
+use strict "subs" ;
+# Joder mierda del strict 
 }
+# End Funcion debug
+
+
+
+#DEBUG-INSERT-END
+
+
+
+
+
 
 sub  xml2array {
 # Note incomplete XML parsing ...
@@ -60,8 +84,6 @@ my %defs= (
 ) ;
 
 
-my $name=	"Menu";
-my $version=	"1.0";
 
 sub info {
    print "$name v$version: Produce a HTML listing menu from a XML var\n";
@@ -171,11 +193,12 @@ sub  menu
 	my @entries = xml2array ( $$rh{$var} ) ;
 	my $output = $pre;
 	foreach my $i (@entries) {
+		debug (5, "ENTRY: $i\n" ) ;
 		my $lin ;
 		#menu.$var.key= indica nombre del valor en las entradas que indica la clave
-		debug (3, "menu.$var.key= " . $$rh{"menu.$var.key"}) ;
-		debug (3, "menu.$var.active = " . $$rh{"menu.$var.active"}) ;
-		if ($$i{$$rh{"menu.$var.key"}} =~ /$$rh{"menu.$var.active"}/ ) {  $lin= $template_actived ;
+		debug (3, "KEY menu.$var.key= " . $$rh{"menu.$var.key"}) ;
+		debug (3, "ACTIVE menu.$var.active = " . $$rh{"menu.$var.active"}) ;
+		if ( defined ($$i{$$rh{"menu.$var.key"}}) && ( $$i{$$rh{"menu.$var.key"}} =~ /$$rh{"menu.$var.active"}/ )) {  $lin= $template_actived ;
 				debug (3, "menu.$var.key   =". $$i{$$rh{"menu.$var.key"}}  ."\nmenu.$var.active=". $$rh{"menu.$var.active"});
 				}
 		else {		$lin= $template ; }

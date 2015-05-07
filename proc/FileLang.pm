@@ -10,27 +10,46 @@ require HTML::LinkExtor;
 use POSIX ;
 use strict ;
 no strict "subs" ;
-	
+
+
+my $name=       "FileLang";
+my $version=    "1.2";
+
+#DEBUG-INSERT-START
+
 #-------------------------------------------------------------------------
-# Function: debug 
+# Function: debug
+# Version 2.0
+# Permite el "debug por niveles independientes"
+ 
 #-------------------------------------------------------------------------
 sub debug {
         my @lines = @_ ;
-        if (defined (&wbbdebug)) { wbbdebug (@lines) ; }
-        elsif (defined main::debug) { main::debug (@lines) ; }
-        else {
+# Por el tema de strict 
+        no strict "subs" ;
+	my $level = $lines[0] ;
+	unshift @lines , $name;
+        if (defined main::debug_print) { main::debug_print (@lines) ; }
+       else {
           my $level = shift @lines ;
         my $line= join '', @lines ;
         chomp $line ;
-        print STDERR "$line\n" ;
+        print STDERR "$name: $line\n" ;
         }
+use strict "subs" ;
+# Joder mierda del strict 
 }
 # End Funcion debug
 
 
 
-my $name=	"FileLang";
-my $version=	"1.2";
+#DEBUG-INSERT-END
+
+
+
+
+
+
 
 ## No gusta pero lo veo más comodo que cargar uno por defecto y como es largo lo defino aqui, y lo
 # meto despues en el defs.
@@ -204,16 +223,16 @@ sub filelang {
 		$lang= $$rv{'language.default'} ; 
 		my @dirs =   split  /\//, $$rv{'wbbActualfile'}  ;
 		$file = pop (@dirs) ;
-		#print STDERR "before regex file=$file\n" ;
+		debug (5, "before regex file=$file\n") ;
 		$file =~ /$$rv{'wbbFileNameRegExp'}/ ; 
 		$file = $1 ;
-		#print STDERR "After regex file=$file pangpattern=$$rv{'language.detectpattern'}\n" ;
+		debug (4, "After regex file=$file langpattern=$$rv{'language.detectpattern'}\n");
 	
 		if ($file =~ /$$rv{'language.detectpattern'}/) {
 			$name=$1 ;
 			$$rv{'languaje.name'} =$1 ; 
 			$lang=$2 ;
-			#print STDERR "detectado lenguaje = $lang name=$name, pattern = $$rv{'language.detectpattern'} values $1, $2\n" ;
+		debug (4,"detectado lenguaje = $lang name=$name, pattern = $$rv{'language.detectpattern'} values $1, $2\n") ;
 		}
 		else {$name=$file ; }
 		
@@ -223,7 +242,8 @@ sub filelang {
 	
 		#Changing the name ?
 		if (( $$rv{'language.changename'} eq "1") || ( $$rv{'language.changename'} eq "yes") ){
-		#print STDERR  "Want to change the NAME = 1, name =$name, lang=$$rv{'wbbLang'} ($lang), pattern= $$rv{'language.writepattern'}\n" ; 
+		debug (4,"Want to change the NAME = 1, name =$name, lang=$$rv{'wbbLang'} ($lang), pattern= $$rv{'language.writepattern'}\n") ; 
+
 		my @dirs =  split  /\//, $$rv{'wbbTarget'}  ;
 		pop (@dirs) ;
 		my $newname=   $$rv{'language.writepattern'} ;
@@ -242,7 +262,7 @@ sub filelang {
 		
 	}
   	debug (1, "FileLang end,   filename= $$rv{'wbbActualfile'}") ;
-        debug (1, "FileLang end  target = $$rv{'wbbTarget'}}") ;
+        debug (1, "FileLang end  target = $$rv{'wbbTarget'}") ;
 	        #print STDERR "FileLang, salimos aqui src= $$rv{'wbbActualfile'} dst=$$rv{'wbbTarget'} \n " ;
 }
 
@@ -287,7 +307,7 @@ sub otherlang {
 		# No tengo ganas de pensar mucho hoy, esto seguramente se reescribirá pronto, FJMC 
 		# $$rv{'wbbSource'}  contiene el fichero fuente, path incluido y por ahora
 		# la extension finalizadora es wbb
-		$$rv{'wbbSource'} =~ /(.*)\.(..)\.wbb/ ;
+		if ($$rv{'wbbSource'} =~  /(.*)\.(..)\.wbb/ ) {
 		my $filebase=$1 ;
 		my @tmp = split /\//, $filebase ;
 		my $base = pop @tmp ;
@@ -309,6 +329,7 @@ sub otherlang {
 		debug (3, "Generado otherlang line in variable *$$rv{'filelang.otherlang.var'}* , value:\n<--->$$rv{$$rv{'filelang.otherlang.var'}}<--->\n" ) ;
 		
 			
+	}
 	}
 	else { debug( 1, "FileLang::otherlang called , but wbbLang not defined!!") ; }
 }
@@ -351,7 +372,7 @@ sub linkfix  {
 			$count++ ;
 			}
 #		print STDERR "$banner links correguidos en $$rv{'wbbSource'} = $count\n" ;
-		debug (1," $banner links correguidos en $$rv{'wbbSoruce'} var $var = $count\n") ; 
+		debug (1," $banner links correguidos en $$rv{'wbbSource'} var $var = $count\n") ; 
 		$$rv{$var} = $txt ; 
 		}
 
