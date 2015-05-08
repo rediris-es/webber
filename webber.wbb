@@ -1,22 +1,24 @@
-## Webber configuration file $Id$
-##
-##
-## Main variables (used and/or set internally by webber itself)
-##
 ##where the webber standard root start
-##wbbRoot=/var/www/html
+#wbbRoot=/XXXX/XXXX/XXXX/webber-master/
 ## Where "standard" processors are located
 #wbbProcLib= $var(wbbRoot)/proc
-#wbbProcLib=/usr/lib/webber/proc
 ## Version
-#wbbVersion = Webber 1.4
 ## Template dir name
 #wbbTemplateName= wbbdir.cfg
 #wbbFileNameRegExp = ^(.+)\.wbb$
 #wbbFileLangRegExp = ^.+(es|en|ca|gl)\.wbb$
 # Default extension 
 #wbbExtension = .html
-##wbbDebugFile= $var(wbbRoot)/debug.txt
-#wbbDebugFile = ./debug.txt
+#wbbDebugFile= $var(wbbRoot)debug.txt
+##wbbDebugFile = ./debug.txt
 #wbbDebug = 10 
-#wbbPre = FileLang::filelang 
+#wbbRun=File::SetTarget File::ReadVars wbbPre wbbProc wbbPost File::WriteVar
+#File.WriteVar= wbbOut
+#wbbPre=
+#wbbProc= Webbo::webbo
+#wbbPost= 
+#webbo.src=file:$var(wbbRoot)src/test.webbo
+#webbo.dst=wbbOut
+#wbbSourceRoot= $var(wbbRoot)src
+#wbbTargetRoot= $var(wbbRoot)html
+#wbbMakedir=1
