@@ -1,0 +1,6 @@
+#wbbExtension= .php
+#title=Hola mundo
+#wbbIn=
+
+<?php echo '<p>Hola Mundo</p>'; ?>
+

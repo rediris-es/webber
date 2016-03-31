@@ -1,5 +1,6 @@
 ##where the webber standard root start
 #wbbRoot=/XXXX/XXXX/XXXX/webber-master/
+#wbbRoot=/Users/paco/programas/webber/
 ## Where "standard" processors are located
 #wbbProcLib= $var(wbbRoot)/proc
 ## Version

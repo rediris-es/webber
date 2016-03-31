@@ -88,10 +88,10 @@ to a file pointed by  wbbTarget varible.
 
 File::WriteVar uses the following Webber variables:
  #File.WriteVar: Is the variable to be written (defaults to wbbOut)
- #wbbTarget: Filename (path included)
+ #wbbTarget: Filename (path included) without the extension wbbExtension
  #wbbexttmp: Extensión temporal de los ficheros
  #wbbTargetFileMode:  File mode (UNIX octal permisssions)
-
+ #wbbExtension : Filename extension 
 ReadVars: Read Webber Vars from a file , add all the vars read to the webber Vars
 
 File::ReadVars uses the following Webber variable:
@@ -109,16 +109,21 @@ sub SetTarget {
 #----
    debug 2, "Setting de target,  file= $$refvar{'wbbSource'} \n" ;   
    debug 2, "wbbTargetRoot is $$refvar{'wbbTargetRoot'}\n" ;
-   
+   debug 2, "wbbExtension is $$refvar{'wbbExtension'}" if (defined $$refvar{'wbbExtension'}) ;
+ 
   # No se para que cojones era el wbbTarget, asi que lo pongo a un valor simbolico, ya que despues se camiba
-	$$refvar{'wbbTarget'} = $$refvar{'wbbSource'} . $$refvar{'wbbExtension'}  unless (defined ($$refvar{'wbbTarget'} ));
-  
+   # $$refvar{'wbbTarget'} = $$refvar{'wbbSource'} . $$refvar{'wbbExtension'}  unless (defined ($$refvar{'wbbTarget'} ));
+   $$refvar{'wbbTarget'} = $$refvar{'wbbSource'}  unless (defined ($$refvar{'wbbTarget'} ));
+
    my ($name, $lang);
    if (! ((defined $$refvar{'wbbInteractive'}) && ( $$refvar{'wbbInteractive'}  eq "1")  )) {
+  
       if ($$refvar{'wbbSource'} =~ /$$refvar{'wbbFileNameRegExp' }/) { $name = $1; }
       else { $name = $$refvar{'wbbSource'}; }
       
-      $$refvar{"wbbTargetName"} = $$refvar{"wbbTarget"}.$$refvar{"wbbExtension"};
+    # $$refvar{"wbbTargetName"} = $$refvar{"wbbTarget"}.$$refvar{"wbbExtension"};
+      $$refvar{"wbbTargetName"} = $$refvar{"wbbTarget"} ;
+
  # Esto nunca se produce     $$refvar{"wbbTarget"} =~ s/\.$lang$// if ($lang ne "");
    }
 
@@ -159,12 +164,13 @@ sub SetTarget {
     debug (1,"creating path $target") ;
      mkpath ( untaint("$target") ,0,0755) ;
    }
-	else{ debug 1, " no se cumple condicion  Path don't exists and wbbMakedir= $$refvar{'wbbMakedir'} " ;}
+	else{ debug 1, " no se cumple condicion  Path $target exists s and wbbMakedir not false ( $$refvar{'wbbMakedir'}) " ;}
 
   if (not -d $target ) { 		debug 0,  " ojo con -d target $target"; }
 
-   $target .= "/$name$$refvar{'wbbExtension'}";
-    
+   #$target .= "/$name$$refvar{'wbbExtension'}";
+    $target .= "/$name" ;
+
    if (($$refvar{'wbbForceupdate'} ==0 )and (my $targetdate = (stat "$target")[9] )) {
       if ($stats[9]<=$targetdate) {
          print STDERR "$target is more recent than $$refvar{'wbbSource'}. Skipping\n";
@@ -186,9 +192,14 @@ sub SetTarget {
   	$$refvar{'wbbTarget'} =  untaint ($target ) ;  # NOTA Seguramente esto debería ser "depraced" 
 	$$refvar{'wbbTargetRelative'} = $$refvar{'wbbTarget'} ;
 	$$refvar{'wbbTargetRelative'} =~ s/$$refvar{'wbbTargetRoot'}// ;
-
+    
    }
-	
+
+   debug 3, "wbbActualFile is $$refvar{'wbbActualFile'}" ;
+   debug 3, "wbbSource is $$refvar{'wbbSource'}" ;
+   debug 3, "wbbTarget is $$refvar{'wbbTarget'}" ;
+   debug 3, "wbbTargetRelative is $$refvar{'wbbTargetRelative'}" ;
+   	
 }
 sub WriteVar  
 {
@@ -208,13 +219,12 @@ sub WriteVar
    close (FILE);
 # Now the move
    unlink $$refvar{'wbbTarget'}  if -e  $$refvar{'wbbTarget'}   ;
-   rename $$refvar{'wbbTarget'}  . $$refvar{'wbbexttmp'} , $$refvar{'wbbTarget'}  ;
-   debug (2,"file  $$refvar{'wbbTarget'}$$refvar{'wbbexttmp'}  renamed to  $$refvar{'wbbTarget'} ") ;
-   chmod oct $$refvar{"wbbTargetFileMode"}, untaint ($$refvar{'wbbTarget'} );
+   rename $$refvar{'wbbTarget'}  . $$refvar{'wbbexttmp'} , $$refvar{'wbbTarget'} . $$refvar{'wbbExtension'}  ;
+   debug (2,"file  $$refvar{'wbbTarget'}$$refvar{'wbbexttmp'}  renamed to  $$refvar{'wbbTarget'}$$refvar{'wbbExtension'} ") ;
+   chmod oct $$refvar{"wbbTargetFileMode"}, untaint ( "$$refvar{'wbbTarget'}$$refvar{'wbbExtension'}" );
 
 }
 
-if ($0 =~ /$name/) { &help; die ("\n"); }
 
 sub ReadVars {
 	my $refvar =$_[0] ;
@@ -314,6 +324,11 @@ sub NormalizePath {
 }
 
 
+#----------------------------------------------------------------------
+# Codigo: (template)
+#----------------------------------------------------------------------
+
+if ($0 =~ /$name/) { &help; die ("\n"); }
 
 
 	

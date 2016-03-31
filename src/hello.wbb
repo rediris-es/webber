@@ -1,6 +1,9 @@
 #title=Hola mundo
 #wbbIn=
 
-Primera prueba con webber, no es mucho,< a href="loren.html"> aqui </a> tienes mejor el loren ipsum mas o menos largo
+Primera prueba con webber, no es mucho,< a href="loren.html"> aqui </a> tienes mejor el loren ipsum mas o menos largo.
+<p>
+Para ver el uso de algunos procesadores básicos, puedes ir <a href="someprocs"> aquí </a>
 
+First TEST with with webber, <a href="loren.html"> Long loren ipsum</a>. To see the usage of some basic processors you can go </a href="someprocs"> here</a>
 
